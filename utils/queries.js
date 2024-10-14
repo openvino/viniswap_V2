@@ -155,8 +155,6 @@ export const swapWethToTokensBatch = async (tokenAmount, sendBatch ) => {
 
 		const pairContractObj = await pairContract(pairAddress);
 		const reserves = await pairContractObj.getReserves();
-
-		console.log(reserves, "reserves");
 		const reserveOut = reserves[1];
 		const reserveIn = reserves[0];
 		console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
@@ -183,8 +181,6 @@ export const swapWethToTokensBatch = async (tokenAmount, sendBatch ) => {
 		updateTransactionMessage("STEP 1/3 - Depositing ETH...");
 		const deposit = async (amount)=>{
 			const depositReceipt = await wrapEth(toEth(amount));
-			// console.log("Deposit receipt: ", depositReceipt);
-			// return depositReceipt
 		}
 
 		const swap = async () => {

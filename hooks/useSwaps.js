@@ -63,10 +63,8 @@ const useSwaps = () => {
     const fetchPrice = async (inToken, outToken) => {
       try {
         setLoading(true);
-        console.log(inToken, outToken);
         const address0 = getCoinAddress(inToken);
         const address1 = getCoinAddress(outToken);
-        console.log(address0, address1);
         const relativePrices = await getPrice(address0, address1);
 
         setPrice(relativePrices);

@@ -27,7 +27,7 @@ export default function Home() {
 				<ConnectButton
 					client={client}
 					accountAbstraction={accountAbstraction}
-					
+					 
 					connectButton={{
 						label: "Connect Wallet",
 						style: {

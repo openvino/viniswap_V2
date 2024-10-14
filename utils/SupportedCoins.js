@@ -20,7 +20,6 @@ export const coinAddresses = [
 ];
 
 export const getCoinAddress = (name) => {
-  console.log(name);
   const coin = coinAddresses.find((coin) => coin.name === name);
   return coin?.address || "";
 };
