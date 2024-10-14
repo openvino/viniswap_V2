@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+	input[type="number"]::-webkit-inner-spin-button,
+	input[type="number"]::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+		Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+	html {
+		color-scheme: dark;
+	}
+	body {
+		color: white;
+		background: black;
+	}
+}
+
+.spinner-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	background-color: black;
+}
+
+.spinner {
+	border: 4px solid rgba(255, 255, 255, 0.3);
+	border-top: 4px solid white;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+html,
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#__next {
+	height: 100%;
+}
+
+.spinner-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh; /* Altura completa de la ventana */
+	background-color: black; /* Fondo negro para la pantalla de carga */
+}
+
+.spinner {
+	border: 8px solid rgba(255, 255, 255, 0.3);
+	border-left-color: #ffffff; /* Color blanco para la parte del spinner */
+	border-radius: 50%;
+	width: 50px; /* Ajusta el tamaño del spinner aquí */
+	height: 50px; /* Ajusta el tamaño del spinner aquí */
+	animation: spin 1s linear infinite; /* Animación de giro */
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+html,
+body {
+	height: 100%;
+	margin: 0; /* Elimina el margen por defecto */
+}
+
+#__next {
+	height: 100%; /* Asegúrate de que el contenedor principal ocupe toda la altura */
+}
