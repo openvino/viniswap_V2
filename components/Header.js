@@ -1,32 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-// import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { createWallet } from "thirdweb/wallets";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
-import { defineChain, optimism, optimismSepolia } from "thirdweb/chains";
+import { ConnectButton, } from "thirdweb/react";
+import { optimismSepolia } from "thirdweb/chains";
 import { accountAbstraction, client } from "../config/thirdwebClient";
-const chain = optimismSepolia;
 const Header = () => {
   const [tokenBalComp, setTokenBalComp] = useState();
-  // const account = useAccount();
-  // const { address } = useAccount();
 
   const notifyConectWallet = () => {
     toast.error("Connect your wallet", { duration: 2000 });
   };
 
   return (
-    // <div
-    //   className="fixed left-0 top-0 w-full  py-4  items-center
-    //   bg-[#2D242F]
 
-    // "
-    // >
     <div
-      className="fixed left-0 top-0 w-full  py-4  items-center 
-      
-    
-    "
+      className="fixed left-0 top-0 w-full    items-center  "
     >
       <div className="flex items-center justify-between  ">
         {/* <div className="flex items-center justify-between bg-[#2D242F] "> */}
@@ -41,15 +28,21 @@ const Header = () => {
               {/* <ConnectButton className="flex rounded-3xl" /> */}
               <ConnectButton
                 client={client}
-               
+                locale="es_ES"
                 accountAbstraction={accountAbstraction}
+                connectModal={{
+                  size: "compact", title: "Viniswap", welcomeScreen: {
+                    title: 'eskere',
+                    img: "/mtb.png",
+                  }
+                }}
                 connectButton={{
                   label: "Connect Wallet",
                   style: {
                     padding: "12px 24px",
-                    background: "#fff",
-                    color: "#840c4a",
-                    fontSize: "20px",
+                    background: "#000",
+                    color: "#fff",
+                    fontSize: "16px",
                     fontWeight: "bold",
                     borderRadius: "12px",
                     boxShadow:

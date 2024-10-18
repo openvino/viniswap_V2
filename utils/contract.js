@@ -85,14 +85,6 @@ export const routerContract = async () => {
   const provider = useWeb3Store.getState().provider;
   const activeAccount = useWeb3Store.getState().activeAccount;
   const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
   if (activeAccount) {
     const contractReader = new ethers.Contract(
       process.env.NEXT_PUBLIC_ROUTER,
@@ -160,14 +152,7 @@ export const pairContract = async (pairAddress) => {
   const provider = useWeb3Store.getState().provider;
   const activeAccount = useWeb3Store.getState().activeAccount;
   const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
+
   if (activeAccount) {
     try {
       return new ethers.Contract(pairAddress, pairABI, signer);

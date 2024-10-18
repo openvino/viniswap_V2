@@ -12,6 +12,8 @@
 
 html,
 body {
+	background-image: url("/assets/background.jpeg");
+	background-size: cover;
 	padding: 0;
 	margin: 0;
 	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
@@ -33,7 +35,6 @@ a {
 	}
 	body {
 		color: white;
-		background: black;
 	}
 }
 

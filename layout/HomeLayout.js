@@ -35,7 +35,7 @@ const HomeLayout = ({ children }) => {
 
 	return (
 		// <div className="min-w-screen min-h-screen flex flex-col bg-[#2D242F]">
-		<div className='flex flex-col min-h-screen bg-black overflow-auto '>
+		<div className='flex flex-col min-h-screen  overflow-auto '>
 			<div className='min-w-screen min-h-screen flex flex-col '>
 				<div className='flex items-center justify-center mb-8'>
 					<Header />

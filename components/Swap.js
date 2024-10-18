@@ -18,51 +18,42 @@ import {
 	ENTER_AMOUNT,
 	SELECT_PAIR,
 	SWAP,
-	SWITCH_NETWORK,
 	getSwapBtnClassName,
 	notifyError,
 	notifySuccess,
 } from "../utils/swap-utils";
 import { CogIcon } from "@heroicons/react/outline";
 import { CgArrowsExchangeV } from "react-icons/cg";
-
 import SwapField from "./SwapField";
 import TransactionStatus from "./TransactionStatus";
-
-import { DEFAULT_VALUE, WETH, getCoinAddress } from "../utils/SupportedCoins";
-
+import { DEFAULT_VALUE, getCoinAddress } from "../utils/SupportedCoins";
 import NavItems from "./NavItems";
 import SwapOptions from "./swapOptions";
 import useSwaps from "../hooks/useSwaps";
 import { pairIsWhitelisted } from "../utils/pools-utils";
-
-import { optimismSepolia, optimism } from "thirdweb/chains";
+import { optimismSepolia } from "thirdweb/chains";
 import useWeb3Store from "../zustand/store";
-import { useActiveAccount, useSendBatchTransaction, } from "thirdweb/react";
+import { useActiveAccount, useSendBatchTransaction, useConnectedWallets, useSetActiveWallet } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { deposit, withdraw, approve } from "thirdweb/extensions/erc20";
-import { chain, client, thirdwebWethContract } from "../config/thirdwebClient";
+import { client } from "../config/thirdwebClient";
 import { wethABI } from "../utils/abi";
 import { toEth, toWei } from "../utils/ether-utils";
 import { ethers } from "ethers";
 import { getPairAddress } from "../utils/whitelistedPools";
 import { pairContract, routerContract } from "../utils/contract";
-
 import { useActiveWallet } from "thirdweb/react";
- 
+import WalletModal from "./Modals/WalletModal";
+
 const Swap = () => {
 
 	const smartAccount = useActiveAccount();
 	const wallet = useActiveWallet();
-
+	const wallets = useConnectedWallets();
 	const { mutate: sendBatch, data: transactionResult, isPending, error } = useSendBatchTransaction();
+	const setActiveAccount = useSetActiveWallet();
 
-	const contractWeth = getContract({
-		client: client,
-		chain: optimismSepolia,
-		address: process.env.NEXT_PUBLIC_WETH_ADDRESS,
-		abi: wethABI
-	})
+	const [isOpenModalWallet, setIsOpenModalWallet] = useState(false);
+	const [showedUserWalletSelected, setShowedUserWalletSelected] = useState(false)
 
 	const {
 		srcToken,
@@ -75,7 +66,6 @@ const Swap = () => {
 		setOutputValue,
 		swapOptionsOpen,
 		setSwapOptionsOpen,
-		slippage,
 		setSlippage,
 		swapBtnText,
 		setSwapBtnText,
@@ -85,7 +75,6 @@ const Swap = () => {
 		srcTokenObj,
 		destTokenObj,
 		price,
-		setPrice,
 		loading,
 		address,
 	} = useSwaps();
@@ -125,63 +114,24 @@ const Swap = () => {
 		setOutputValue("");
 	}, []);
 
-	wallet?.subscribe("accountChanged", (account) => {
-		console.log(account);
-	  });
 
 
+	useEffect(() => {
 
-	// const performSwap = async () => {
-	// 	setTxPending(true);
-	// 	try {
-	// 		let receipt;
+		if (smartAccount?.address && !showedUserWalletSelected) {
+			setIsOpenModalWallet(true);
+			setShowedUserWalletSelected(true)
 
-	// 		if (srcToken === WETH && destToken !== WETH) {
-	// 			// receipt = await swapWethToTokens(outputValue);
-	// 			receipt = await swapWethToTokensBatch(outputValue,sendBatch, transactionResult);
-	// 			if (!receipt) {
-	// 				throw new Error("Transaction failed");
-	// 			}
-	// 			notifySuccess("Swap completed succesfully!");
-	// 			return;
-	// 		} else if (srcToken !== WETH && destToken === WETH) {
-	// 			receipt = await swapTokensToWeth(inputValue);
-	// 			if (!receipt) {
-	// 				throw new Error("Transaction failed");
-	// 			}
-	// 			console.log("swap succesful", receipt);
+		}
 
-	// 			setInputValue("");
-	// 			setOutputValue("");
-	// 		}
+	}, [smartAccount?.address]);
 
-	// 		if (receipt && !receipt.hasOwnProperty("transactionHash")) {
-	// 			notifyError(receipt);
-	// 		} else {
-	// 			notifySuccess();
-	// 		}
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 		// notifyError("Transaction failed");
-	// 	}
-	// };
 
 	const performSwap = async () => {
-		
 		setTxPending(true);
-
-		console.log(wallet);
-
-	
-		
 		try {
 			const provider = useWeb3Store.getState().provider;
-			const signer = provider.getSigner();
-
-			console.log(provider);
-			console.log(signer);
-
-			return
+			const signer = useWeb3Store.getState().signer;
 
 			// Instanciar el contrato de WETH con el signer
 			const wethContract = new ethers.Contract(
@@ -190,35 +140,29 @@ const Swap = () => {
 				signer
 			);
 
-			//instancia del par
+			// Instancia del par
 			const pairAddress = getPairAddress([process.env.NEXT_PUBLIC_MTB24_ADDRESS, process.env.NEXT_PUBLIC_WETH_ADDRESS]);
-			// console.log(pairAddress, "pairAddress");
 
 			const exactTokenAmount = Math.floor(outputValue);
-			// console.log(exactTokenAmount);
 
-			//instancia del router 
+			// Instancia del router 
 			const routerObj = await routerContract();
 			if (!routerObj) {
 				throw new Error("No se pudo obtener el contrato del router");
 			}
 
-			//instancia del par y reservas
+			// Instancia del par y reservas
 			const pairContractObj = await pairContract(pairAddress);
 			const reserves = await pairContractObj.getReserves();
 			const reserveOut = reserves[1];
 			const reserveIn = reserves[0];
-			// console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
 
-			//Balance inicial
+			// Balance inicial
 			const initialTokenBalance = await tokenBalance();
 			const initialWethBalance = await wethBalance();
 
 			const amount = ethers.BigNumber.from(toWei(outputValue));
-
-			const amountIn = await routerObj.getAmountIn(amount, reserveIn, reserveOut); // Price
-			console.log(toEth(amountIn), "amountIn");
-
+			const amountIn = await routerObj.getAmountIn(amount, reserveIn, reserveOut);
 			const amountSlippage = amountIn.mul(120).div(100);
 			const finalAmountBN = ethers.utils.parseUnits(
 				amountSlippage.toString(),
@@ -227,47 +171,99 @@ const Swap = () => {
 
 			const finalAmount = finalAmountBN.toString();
 
-			//Objeto para el batch
-			const wrapEthTx = {
-				to: process.env.NEXT_PUBLIC_WETH_ADDRESS,
-				data: wethContract.interface.encodeFunctionData("deposit"),
-				value: finalAmount,
-				chain: optimismSepolia
-			};
-			//Increase Allowance
-			const approvalTx = {
-				to: process.env.NEXT_PUBLIC_WETH_ADDRESS,
-				data: wethContract.interface.encodeFunctionData("approve", [
+			// Identificar si es una smart wallet
+			const smartWallet = wallets.find(wallet => wallet.id === "smart");
+			const isSmartWallet = smartWallet && wallet.id === "smart";
+
+			if (isSmartWallet) {
+				// Verificar el balance de la smart wallet
+				const smartWalletAddress = smartWallet.getAccount().address;
+				const balance = await provider.getBalance(smartWalletAddress);
+				console.log(balance, 'balance');
+
+				
+
+				if (balance.lt(finalAmount)) {
+					notifyError("Insufficient funds in the smart wallet, please select a different wallet.");
+					setIsOpenModalWallet(true);
+					return;
+				}
+
+				// Si es una smart wallet, ejecutar las transacciones en batch
+				const wrapEthTx = {
+					to: process.env.NEXT_PUBLIC_WETH_ADDRESS,
+					data: wethContract.interface.encodeFunctionData("deposit"),
+					value: finalAmount,
+					chain: optimismSepolia
+				};
+
+				const approvalTx = {
+					to: process.env.NEXT_PUBLIC_WETH_ADDRESS,
+					data: wethContract.interface.encodeFunctionData("approve", [
+						routerObj.address,
+						finalAmountBN.toString()
+					]),
+					chain: optimismSepolia
+				};
+
+				const swapTx = {
+					to: routerObj.address,
+					data: routerObj.interface.encodeFunctionData("swapTokensForExactTokens", [
+						toWei(outputValue),
+						toWei(initialWethBalance),
+						[
+							process.env.NEXT_PUBLIC_WETH_ADDRESS,
+							process.env.NEXT_PUBLIC_MTB24_ADDRESS
+						],
+						smartWalletAddress,
+						Math.floor(Date.now() / 1000) + 60 * 10
+					]),
+					chain: optimismSepolia
+				};
+
+				await sendBatch([wrapEthTx, approvalTx, swapTx]);
+
+				notifySuccess('eskere');
+
+			} else {
+				// Si no es una smart wallet, ejecutar las transacciones independientes
+
+				// 1. Envolver ETH a WETH
+				const wrapTx = await wethContract.deposit({
+					value: finalAmountBN.toString()
+				});
+				await wrapTx.wait();
+
+				// 2. Aprobar el gasto de WETH
+				const approveTx = await wethContract.approve(
 					routerObj.address,
 					finalAmountBN.toString()
-				]),
-				chain: optimismSepolia
-			}
+				);
+				await approveTx.wait();
 
-			//Swap
-			const swapTx = {
-				to: routerObj.address,
-				data: routerObj.interface.encodeFunctionData("swapTokensForExactTokens", [
+				// 3. Realizar el swap
+				const swapTx = await routerObj.swapTokensForExactTokens(
 					toWei(outputValue),
 					toWei(initialWethBalance),
 					[
 						process.env.NEXT_PUBLIC_WETH_ADDRESS,
 						process.env.NEXT_PUBLIC_MTB24_ADDRESS
 					],
-					"0x2E54D912361f6A4b1e57E239138Ff4C1344940Ae",
+					signer.getAddress(), // Dirección del usuario
 					Math.floor(Date.now() / 1000) + 60 * 10
-				]),
-				chain: optimismSepolia
-
+				);
+				await swapTx.wait();
+				notifySuccess('eskere 2');
 			}
-			await sendBatch([wrapEthTx, approvalTx, swapTx]);
-			
+
 		} catch (error) {
+			notifyError(error.message)
 			console.log("Error al realizar el swap:", error);
 		} finally {
 			setTxPending(false);
 		}
 	};
+
 
 
 	useEffect(() => {
@@ -300,6 +296,9 @@ const Swap = () => {
 			<div className='flex md:px-4'>
 				<NavItems />
 			</div>
+
+
+			<WalletModal open={isOpenModalWallet} onClose={setIsOpenModalWallet} />
 
 			<div className='flex items-center justify-between px-1 my-4'>
 				<p>Swap</p>

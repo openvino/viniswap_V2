@@ -27,7 +27,6 @@ export const getPairAddress = (pair) => {
       (p.pair[0] === pair[0] && p.pair[1] === pair[1]) ||
       (p.pair[0] === pair[1] && p.pair[1] === pair[0])
   );
-  console.log(filteredPair);
 
   return filteredPair?.address || null;
 };

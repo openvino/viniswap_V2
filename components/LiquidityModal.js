@@ -30,6 +30,8 @@ const LiquidityModal = ({
 	const [liquidityAmount, setLiquidityAmount] = useState("");
 	const [removePercentage, setRemovePercentage] = useState(0);
 
+	const [error, setError] = useState(null);
+
 	const handleChangeTokenAmount = (e) => {
 		console.log(reserves);
 
@@ -105,6 +107,8 @@ const LiquidityModal = ({
 			isExceedingBalance(amounts.tokenAAmount, signerBalances.srcBalance) ||
 			isExceedingBalance(amounts.tokenBAmount, signerBalances.destBalance)
 		) {
+
+			setError("Insufficient Balance");
 			return;
 		} else {
 			setIsLoading(true);
@@ -141,29 +145,27 @@ const LiquidityModal = ({
 
 				<div className='flex mb-4 justify-center'>
 					<button
-						className={`mr-2 p-2 rounded-xl w-1/2 h-[3rem] ${
-							action === "add"
-								? "bg-[#44162e]"
-								: "bg-[#212429] hover:bg-[#212429]"
-						}`}
+						className={`mr-2 p-2 rounded-xl w-1/2 h-[3rem] ${action === "add"
+							? "bg-[#44162e]"
+							: "bg-[#212429] hover:bg-[#212429]"
+							}`}
 						onClick={() => setAction("add")}
 						disabled={isLoading}
 					>
 						Add
 					</button>
 					<button
-						className={`p-2 rounded-xl w-1/2 h-[3rem] ${
-							action === "remove"
-								? "bg-[#44162e]"
-								: "bg-[#212429] hover:bg-[#212429]"
-						}`}
+						className={`p-2 rounded-xl w-1/2 h-[3rem] ${action === "remove"
+							? "bg-[#44162e]"
+							: "bg-[#212429] hover:bg-[#212429]"
+							}`}
 						onClick={() => setAction("remove")}
 						disabled={isLoading}
 					>
 						Remove
 					</button>
 				</div>
-
+				{error && <p className='text-red-500 text-center'>{error}</p>}
 				{action === "add" && (
 					<div>
 						<div className='mb-4'>
@@ -173,19 +175,18 @@ const LiquidityModal = ({
 								type='text'
 								value={amounts.tokenAAmount}
 								placeholder='0.0'
-								className={`w-full p-2 mt-2 rounded-xl h-[3rem] text-3xl py-8 ${
-									isExceedingBalance(
-										amounts.tokenAAmount,
-										signerBalances.srcBalance
-									)
-										? "text-[#9c5454]"
-										: "text-gray-300 bg-[#212429]"
-								} focus:outline-none focus:ring-0`}
+								className={`w-full p-2 mt-2 rounded-xl h-[3rem] text-3xl py-8 ${isExceedingBalance(
+									amounts.tokenAAmount,
+									signerBalances.srcBalance
+								)
+									? "text-[#9c5454]"
+									: "text-gray-300 bg-[#212429]"
+									} focus:outline-none focus:ring-0`}
 								onChange={handleChangeTokenAmount}
 								onFocus={handleFocus}
 								onBlur={handleBlur}
 							/>
-							<label>{signerBalances.srcBalance}</label>
+							<label> Your balance: {signerBalances.srcBalance}</label>
 						</div>
 						<div className='mb-4'>
 							<label>{destToken.name} amount:</label>
@@ -194,19 +195,18 @@ const LiquidityModal = ({
 								type='text'
 								value={amounts.tokenBAmount}
 								placeholder='0.0'
-								className={`w-full p-2 mt-2 rounded-xl h-[3rem] text-3xl py-8 ${
-									isExceedingBalance(
-										amounts.tokenBAmount,
-										signerBalances.destBalance
-									)
-										? "text-[#9c5454]"
-										: "text-gray-300 bg-[#212429]"
-								} focus:outline-none focus:ring-0`}
+								className={`w-full p-2 mt-2 rounded-xl h-[3rem] text-3xl py-8 ${isExceedingBalance(
+									amounts.tokenBAmount,
+									signerBalances.destBalance
+								)
+									? "text-[#9c5454]"
+									: "text-gray-300 bg-[#212429]"
+									} focus:outline-none focus:ring-0`}
 								onChange={handleChangeTokenAmount}
 								onFocus={handleFocus}
 								onBlur={handleBlur}
 							/>
-							<label>{signerBalances.destBalance}</label>
+							<label> Your balance: {signerBalances.destBalance}</label>
 						</div>
 						<button
 							className={

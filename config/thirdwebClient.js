@@ -31,6 +31,4 @@ export const thirdwebWethContract = getContract({
 	client,
 });
 
-console.log(thirdwebRouterContract, "routerContract");
-console.log(thirdwebWethContract, "wethContract");
 

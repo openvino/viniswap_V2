@@ -282,7 +282,6 @@ export const wethBalance = async () => {
 		const walletAddress = activeAccount.address;
 		const wethContractObj = await wethContract(WETH_ADDRESS);
 		const name = await wethContractObj.name();
-		console.log(name);
 
 		const balance = await wethContractObj.provider.getBalance(walletAddress);
 		const formatedBalance = toEth(balance).toString();
@@ -445,8 +444,7 @@ export const getTokenPrice = async (amount = 1) => {
 };
 export const getPrice = async (address0, address1) => {
 	const pairAddress = getPairAddress([address0, address1]);
-	console.log(pairAddress);
-	console.log(address0, address1);
+
 
 	try {
 		const pairContractObj = await pairContract(pairAddress);

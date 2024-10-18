@@ -66,11 +66,9 @@ const useSwaps = () => {
         const address0 = getCoinAddress(inToken);
         const address1 = getCoinAddress(outToken);
         const relativePrices = await getPrice(address0, address1);
-
         setPrice(relativePrices);
       } catch (error) {
         toast.error(error.message);
-
         throw new Error("Error");
       } finally {
         setLoading(false);
