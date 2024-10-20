@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import {
 	ConnectButton,
+	TransactionButton,
 	useActiveAccount,
 	useActiveWallet,
 	useConnectedWallets,
@@ -9,13 +10,17 @@ import {
 } from "thirdweb/react";
 import { optimismSepolia } from "thirdweb/chains";
 import { accountAbstraction, client } from "../config/thirdwebClient";
-import useWeb3Store from "../zustand/store";
-import { tokens } from "../utils/bridgeTokens";
+import { getContract, prepareContractCall } from "thirdweb";
+import { toWei } from "../utils/ether-utils";
 import { ethers } from "ethers";
-import { mtbABI } from "../utils/abi";
-import Spinner from "./spinner";
+import useWeb3Store from "../zustand/store";
+import { erc20ABI, mtbABI } from "../utils/abi";
+import { tokens } from "../utils/bridgeTokens";
+
 const Header = () => {
+	const [tokenBalComp, setTokenBalComp] = useState();
 	const account = useActiveAccount();
+
 	const wallet = useActiveWallet();
 	const wallets = useConnectedWallets();
 	console.log(account?.address);
@@ -29,8 +34,7 @@ const Header = () => {
 	} = useSendBatchTransaction();
 	const cutoffDate = new Date("2024-11-01T00:00:00Z").getTime();
 	const [claiming, setClaiming] = useState(false);
-
-	const performBurnAndMint = async () => {
+	const performBurnAndMint = async (validTokensList) => {
 		console.log("performing Burn and Mint");
 
 		try {
@@ -43,36 +47,45 @@ const Header = () => {
 				"function mint(address token, address recipient, uint256 amount)",
 			]; // ABI para el método mint
 
+			// Verificar si es una smart wallet
 			const smartWallet = wallets.find((wallet) => wallet.id === "smart");
 			const isSmartWallet = smartWallet && wallet.id === "smart";
 			const walletAddress = await signer.getAddress();
 
 			const transactions = [];
-			for (let { tokenAddress, balance } of validTokens) {
+
+			// Iterar sobre los tokens válidos
+			for (let { tokenAddress, balance } of validTokensList) {
 				const amount = balance;
 
-				//burn
-				const tokenContract = new ethers.Contract(tokenAddress, mtbABI, signer);
-				const burnTx = {
-					to: tokenAddress,
-					data: tokenContract.interface.encodeFunctionData("burn", [amount]),
-					chain: "optimismSepolia",
-				};
+				// Preparar la transacción de quema (burn)
+				const tokenContract = new ethers.Contract(
+					tokenAddress,
+					burnABI,
+					signer
+				);
+				const burnData = tokenContract.interface.encodeFunctionData("burn", [
+					amount,
+				]);
 
-				//  mint
+				// Preparar la transacción de minteo (mint)
 				const minterContract = new ethers.Contract(minter, minterABI, signer);
-				const mintTx = {
-					to: minter,
-					data: minterContract.interface.encodeFunctionData("mint", [
-						tokenAddress,
-						walletAddress,
-						amount,
-					]),
-					chain: "optimismSepolia",
-				};
+				const mintData = minterContract.interface.encodeFunctionData("mint", [
+					tokenAddress,
+					walletAddress,
+					amount,
+				]);
 
 				// Si es smart wallet, agregar transacciones al batch
 				if (isSmartWallet) {
+					const burnTx = {
+						to: tokenAddress,
+						data: burnData,
+					};
+					const mintTx = {
+						to: minter,
+						data: mintData,
+					};
 					transactions.push(burnTx, mintTx);
 				} else {
 					// En caso de no ser smart wallet, ejecutar las transacciones individualmente
@@ -94,66 +107,70 @@ const Header = () => {
 
 			// Ejecutar el batch si es una smart wallet
 			if (isSmartWallet) {
-				await sendBatch(transactions);
-				setTimeout(() => {
-					setClaiming(false);
-					setLoading(false);
-				}, 5000);
-				console.log("Batch burn and mint transactions completed successfully");
+				const batch = await sendBatch(transactions);
+				console.log(
+					"Batch burn and mint transactions completed successfully",
+					batch
+				);
 			}
 		} catch (error) {
 			console.error("Error in performBurnAndMint:", error);
 		}
-		setTimeout(() => {
-			setClaiming(false);
-			setLoading(false);
-		}, 1000);
 	};
-
-	//OK
-	// const performBurnAndMint = async (validTokensList) => {
+	// const performBurnAndMint = async () => {
+	// 	if (!account?.address) return;
 	// 	console.log("performing Burn and Mint");
+	// 	console.log(validTokens);
 
 	// 	try {
 	// 		const provider = useWeb3Store.getState().provider;
 	// 		const signer = useWeb3Store.getState().signer;
 
-	// 		const minter = "0xdF258287f4f0C75A630Eba449326D722b6b02e0c"; // Dirección del contrato Minter
+	// 		const minter = "0xdF258287f4f0C75A630Eba449326D722b6b02e0c";
 	// 		const burnABI = ["function burn(uint256 amount)"]; // ABI para el método burn
 	// 		const minterABI = [
 	// 			"function mint(address token, address recipient, uint256 amount)",
 	// 		]; // ABI para el método mint
 
+	// 		// Verificar si es una smart wallet
 	// 		const smartWallet = wallets.find((wallet) => wallet.id === "smart");
 	// 		const isSmartWallet = smartWallet && wallet.id === "smart";
 	// 		const walletAddress = await signer.getAddress();
 
 	// 		const transactions = [];
-	// 		for (let { tokenAddress, balance } of validTokensList) {
+
+	// 		// Iterar sobre los tokens válidos
+	// 		for (let { tokenAddress, balance } of validTokens) {
 	// 			const amount = balance;
 
-	// 			//burn
-	// 			const tokenContract = new ethers.Contract(tokenAddress, mtbABI, signer);
-	// 			const burnTx = {
-	// 				to: tokenAddress,
-	// 				data: tokenContract.interface.encodeFunctionData("burn", [amount]),
-	// 				chain: "optimismSepolia",
-	// 			};
+	// 			// Preparar la transacción de quema (burn)
+	// 			const tokenContract = new ethers.Contract(
+	// 				tokenAddress,
+	// 				burnABI,
+	// 				signer
+	// 			);
+	// 			const burnData = tokenContract.interface.encodeFunctionData("burn", [
+	// 				amount,
+	// 			]);
 
-	// 			//  mint
+	// 			// Preparar la transacción de minteo (mint)
 	// 			const minterContract = new ethers.Contract(minter, minterABI, signer);
-	// 			const mintTx = {
-	// 				to: minter,
-	// 				data: minterContract.interface.encodeFunctionData("mint", [
-	// 					tokenAddress,
-	// 					walletAddress,
-	// 					amount,
-	// 				]),
-	// 				chain: "optimismSepolia",
-	// 			};
+	// 			const mintData = minterContract.interface.encodeFunctionData("mint", [
+	// 				tokenAddress,
+	// 				walletAddress,
+	// 				amount,
+	// 			]);
 
 	// 			// Si es smart wallet, agregar transacciones al batch
 	// 			if (isSmartWallet) {
+	// 				const burnTx = {
+	// 					to: tokenAddress,
+	// 					data: burnData,
+	// 				};
+	// 				const mintTx = {
+	// 					to: minter,
+	// 					data: mintData,
+	// 				};
 	// 				transactions.push(burnTx, mintTx);
 	// 			} else {
 	// 				// En caso de no ser smart wallet, ejecutar las transacciones individualmente
@@ -175,15 +192,16 @@ const Header = () => {
 
 	// 		// Ejecutar el batch si es una smart wallet
 	// 		if (isSmartWallet) {
-	// 			await sendBatch(transactions);
-	// 			console.log("Batch burn and mint transactions completed successfully");
+	// 			const batch = await sendBatch(transactions);
+	// 			console.log(
+	// 				"Batch burn and mint transactions completed successfully",
+	// 				batch
+	// 			);
 	// 		}
 	// 	} catch (error) {
 	// 		console.error("Error in performBurnAndMint:", error);
 	// 	}
 	// };
-	//
-	const [loading, setLoading] = useState(false);
 	useEffect(() => {
 		setClaiming(false);
 		const processUserTokensData = async () => {
@@ -199,7 +217,7 @@ const Header = () => {
 			for (let tokenAddress of tokens) {
 				const tokenContract = new ethers.Contract(
 					tokenAddress,
-					mtbABI,
+					erc20ABI,
 					provider
 				);
 
@@ -226,22 +244,16 @@ const Header = () => {
 					disabledTokensList.push({ tokenAddress, balance });
 				} else {
 					validTokensList.push({ tokenAddress, balance });
-					if (balance) setLoading(true);
 				}
 			}
 
 			setDisabledTokens(disabledTokensList);
 			setValidTokens(validTokensList);
 
-			console.log(
-				"finished processing current user tokens",
-				validTokensList.filter((token) => token?.balance > 0)
-			);
-			if (validTokensList.filter((token) => token?.balance > 0).length > 0)
-				setClaiming(true);
+			console.log("finished processing current user tokens");
+			if (validTokensList.length > 0) setClaiming(true);
 			else setClaiming(false);
-			setLoading(false);
-			// performBurnAndMint(validTokensList);
+			performBurnAndMint(validTokensList);
 		};
 
 		account && processUserTokensData();
@@ -255,6 +267,63 @@ const Header = () => {
 						<img src="./mtb.png" className="h-12" />
 
 						<div className="flex rounded-3xl">
+							{/* <TransactionButton
+								transaction={async () => {
+									// Dirección del contrato del token que será minteado
+									const tokenToMintContract =
+										"0x5F9399A2d94e70990C486062c1F2dA9D08A3E14c";
+									// const tokenToMintContract =
+									// "0x435b322121f0918B14A057A986e55A1909e447f1";
+									// const tokenToMintContract =
+									// "0xfE60f87909fDAC634cf8ceCE8D64D0af1653a826";
+									// const tokenToMintContract =
+									// 	"0x39e0aC93CDCa493c850836bC0baB9Df25305Cd2d";
+									// const tokenToMintContract =
+									// 	"0x538077E0EaE2C9B4E83967c8204154090ac81398";
+
+									const minter = "0xdF258287f4f0C75A630Eba449326D722b6b02e0c";
+									const amount = ethers.utils.parseUnits("15", 18);
+
+									if (!account || !account.address) {
+										throw new Error(
+											"La cuenta no está definida o no tiene una dirección válida"
+										);
+									}
+
+									const signer = useWeb3Store.getState().signer;
+									const abi = [
+										"function mint(address token, address recipient, uint256 amount)",
+									];
+									const contract = new ethers.Contract(minter, abi, signer);
+
+									const tx = await contract.mint(
+										tokenToMintContract,
+										account.address,
+										amount
+									);
+									await tx.wait();
+									console.log("Transaction submitted", tx.hash);
+									return tx;
+								}}
+								onTransactionSent={(result) => {
+									console.log("Transaction submitted", result.transactionHash);
+								}}
+								onTransactionConfirmed={(receipt) => {
+									console.log("Transaction confirmed", receipt.transactionHash);
+								}}
+								onError={(error) => {
+									console.error("Transaction error", error);
+								}}
+								gasless={{
+									provider: "openzeppelin",
+									relayerUrl: `https://api.defender.openzeppelin.com/actions/d13d2ed9-8caa-4215-a16d-068b1e6e67c9/runs/webhook/76e39a09-c42a-4cb5-972c-3615fab4ed2c/SuXNRXuivBSikM1xxeDw5x`, // URL del webhook de Defender
+									relayerForwarderAddress:
+										"0xD7317CCa92D40Dd38216e39bB2f968b6Cd9F349f",
+								}}
+							>
+								Confirm Transaction
+							</TransactionButton> */}
+
 							<ConnectButton
 								client={client}
 								locale="es_ES"
@@ -287,54 +356,18 @@ const Header = () => {
 
 				<Toaster />
 			</div>
-			{account?.address && (loading || claiming) && (
+			{account && claiming && (
 				<>
-					<div className="flex items-center justify-center mt-[-1rem]">
-						<div className="rounded-xl p-3 text-center w-fit shadow-md">
-							<div className="flex items-center justify-center mb-2">
-								{account && loading && !claiming && (
-									<h3 className="text-l font-semibold text-black">
-										We moved to BASE! Checking your balances...
-									</h3>
-								)}
-								{account && !loading && claiming && (
-									<h3 className="text-l font-semibold text-black">
-										WELCOME to BASE!
-									</h3>
-								)}
-							</div>
-							<div className="flex items-center justify-center">
-								{account && !loading && claiming && (
-									<button
-										className="bg-black text-white py-1 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-300"
-										onClick={performBurnAndMint}
-									>
-										CLAIM YOUR TOKENS NOW!
-									</button>
-								)}
-								{account && loading && (
-									<div className="flex items-center justify-center h-[2rem] w-[2rem] ml-4">
-										<div
-											style={{
-												border: "4px solid rgba(0, 0, 0, 0.1)",
-												borderLeftColor: "#ffffff",
-												borderRadius: "50%",
-												width: "2rem",
-												height: "2rem",
-												animation: "spin 1s linear infinite",
-											}}
-										></div>
-									</div>
-								)}
-								<style>
-									{`
-										@keyframes spin {
-											to { transform: rotate(360deg); }
-										}
-									`}
-								</style>
-							</div>
-						</div>
+					<div className="flex items-center justify-center ">
+						<button className="w-fit text-black">We moved to base!</button>
+					</div>
+					<div className="flex items-center justify-center ">
+						<button
+							className="w-fit text-white bg-black m-1rem"
+							onClick={performBurnAndMint}
+						>
+							CLAIM YOUR TOKENS NOW!
+						</button>
 					</div>
 				</>
 			)}
