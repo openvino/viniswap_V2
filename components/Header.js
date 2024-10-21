@@ -184,68 +184,68 @@ const Header = () => {
 	// };
 	//
 	const [loading, setLoading] = useState(false);
-	useEffect(() => {
-		setClaiming(false);
-		const processUserTokensData = async () => {
-			if (!account || !account.address) {
-				return;
-			}
+	// useEffect(() => {
+	// 	setClaiming(false);
+	// 	const processUserTokensData = async () => {
+	// 		if (!account || !account.address) {
+	// 			return;
+	// 		}
 
-			const provider = useWeb3Store.getState().provider;
-			const signer = useWeb3Store.getState().signer;
-			let validTokensList = [];
-			let disabledTokensList = [];
+	// 		const provider = useWeb3Store.getState().provider;
+	// 		const signer = useWeb3Store.getState().signer;
+	// 		let validTokensList = [];
+	// 		let disabledTokensList = [];
 
-			for (let tokenAddress of tokens) {
-				const tokenContract = new ethers.Contract(
-					tokenAddress,
-					mtbABI,
-					provider
-				);
+	// 		for (let tokenAddress of tokens) {
+	// 			const tokenContract = new ethers.Contract(
+	// 				tokenAddress,
+	// 				mtbABI,
+	// 				provider
+	// 			);
 
-				const balance = await tokenContract.balanceOf(account.address);
-				console.log(
-					`Balance of ${tokenAddress}: ${ethers.utils.formatUnits(balance, 18)}`
-				);
+	// 			const balance = await tokenContract.balanceOf(account.address);
+	// 			console.log(
+	// 				`Balance of ${tokenAddress}: ${ethers.utils.formatUnits(balance, 18)}`
+	// 			);
 
-				const filter = tokenContract.filters.Transfer(null, account.address);
-				const events = await tokenContract.queryFilter(filter);
-				console.log("events", events);
+	// 			const filter = tokenContract.filters.Transfer(null, account.address);
+	// 			const events = await tokenContract.queryFilter(filter);
+	// 			console.log("events", events);
 
-				let receivedAfterCutoff = false;
-				for (let event of events) {
-					const block = await provider.getBlock(event.blockNumber);
-					const timestamp = block.timestamp * 1000;
+	// 			let receivedAfterCutoff = false;
+	// 			for (let event of events) {
+	// 				const block = await provider.getBlock(event.blockNumber);
+	// 				const timestamp = block.timestamp * 1000;
 
-					if (timestamp >= cutoffDate) {
-						receivedAfterCutoff = true;
-					}
-				}
+	// 				if (timestamp >= cutoffDate) {
+	// 					receivedAfterCutoff = true;
+	// 				}
+	// 			}
 
-				if (receivedAfterCutoff) {
-					disabledTokensList.push({ tokenAddress, balance });
-				} else {
-					validTokensList.push({ tokenAddress, balance });
-					if (balance) setLoading(true);
-				}
-			}
+	// 			if (receivedAfterCutoff) {
+	// 				disabledTokensList.push({ tokenAddress, balance });
+	// 			} else {
+	// 				validTokensList.push({ tokenAddress, balance });
+	// 				if (balance) setLoading(true);
+	// 			}
+	// 		}
 
-			setDisabledTokens(disabledTokensList);
-			setValidTokens(validTokensList);
+	// 		setDisabledTokens(disabledTokensList);
+	// 		setValidTokens(validTokensList);
 
-			console.log(
-				"finished processing current user tokens",
-				validTokensList.filter((token) => token?.balance > 0)
-			);
-			if (validTokensList.filter((token) => token?.balance > 0).length > 0)
-				setClaiming(true);
-			else setClaiming(false);
-			setLoading(false);
-			// performBurnAndMint(validTokensList);
-		};
+	// 		console.log(
+	// 			"finished processing current user tokens",
+	// 			validTokensList.filter((token) => token?.balance > 0)
+	// 		);
+	// 		if (validTokensList.filter((token) => token?.balance > 0).length > 0)
+	// 			setClaiming(true);
+	// 		else setClaiming(false);
+	// 		setLoading(false);
+	// 		// performBurnAndMint(validTokensList);
+	// 	};
 
-		account && processUserTokensData();
-	}, [account]);
+	// 	account && processUserTokensData();
+	// }, [account]);
 
 	return (
 		<div className="fixed left-0 top-0 w-full    items-center  ">

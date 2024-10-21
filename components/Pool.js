@@ -120,15 +120,17 @@ const Pool = () => {
 			setTransactionMessage(
 				(prev) => `${prev} done. <br />Step 4/4: Adding liquidity...`
 			);
-			console.log("****************************",token0,
+			console.log(
+				"****************************",
+				token0,
 				token1,
 				reverse ? tokenBAmount : tokenAAmount,
 				reverse ? tokenAAmount : tokenBAmount,
 				0,
-				0);
-			
+				0
+			);
+
 			const receipt = await addLiquidity(
-				
 				token0,
 				token1,
 				reverse ? tokenBAmount : tokenAAmount,
@@ -137,7 +139,7 @@ const Pool = () => {
 				0
 			);
 			console.log("liquidity added", receipt);
-			
+
 			setTransactionMessage((prev) => `${prev} done.`);
 		} catch (error) {
 			console.log(error);
@@ -272,6 +274,7 @@ const Pool = () => {
 		const getReserves = async () => {
 			const srcTokenAddress = getCoinAddress(srcToken);
 			const destTokenAddress = getCoinAddress(destToken);
+
 			const reserves = getPoolReserves({ srcToken, destToken });
 			console.log("reserves", reserves);
 			if (inputValue.length === 0) setOutputValue("");
@@ -299,15 +302,15 @@ const Pool = () => {
 	};
 
 	return (
-		<div className='p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-20 text-white '>
-			<div className='flex md:px-4'>
+		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-20 text-white ">
+			<div className="flex md:px-4">
 				<NavItems />
 			</div>
-			<div className='flex items-center justify-between  px-1 my-4'>
+			<div className="flex items-center justify-between  px-1 my-4">
 				<p>Liquidity Pool</p>
-				<div className='flex flex-row '>
+				<div className="flex flex-row ">
 					<FiRefreshCcw
-						className='h-6 mr-2'
+						className="h-6 mr-2"
 						style={
 							refreshDisabled
 								? { cursor: "not-allowed", opacity: 0.2 }
@@ -319,11 +322,11 @@ const Pool = () => {
 				</div>
 			</div>
 
-			<div className='flex bg-[#212429] p-4 py-6 rounded-xl mb-2 border-[2px] border-transparent hover:border-zinc-600'>
+			<div className="flex bg-[#212429] p-4 py-6 rounded-xl mb-2 border-[2px] border-transparent hover:border-zinc-600">
 				<PoolField obj={srcTokenObj} />
 			</div>
 
-			<div className='bg-[#212429] p-4 py-6 rounded-xl mt-2 border-[2px] border-transparent hover:border-zinc-600'>
+			<div className="bg-[#212429] p-4 py-6 rounded-xl mt-2 border-[2px] border-transparent hover:border-zinc-600">
 				<PoolField obj={destTokenObj} />
 			</div>
 
