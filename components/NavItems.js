@@ -27,7 +27,7 @@ const NavItems = () => {
 	return (
 		<div
 			style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-			className='bg-transparent h-fit flex items-center justify-around rounded-full w-full overflow-auto text-white '
+			className="bg-transparent h-fit flex items-center justify-around rounded-full w-full overflow-auto text-white "
 		>
 			<p className={getNavIconClassName(SWAP)} onClick={handleNavigate(SWAP)}>
 				{SWAP}
@@ -35,18 +35,18 @@ const NavItems = () => {
 			<p className={getNavIconClassName(POOL)} onClick={handleNavigate(POOL)}>
 				{POOL}
 			</p>
-			{/* <p
+			<p
 				className={getNavIconClassName(BRIDGE)}
 				onClick={handleNavigate(BRIDGE)}
 			>
 				{BRIDGE}
-			</p> */}
+			</p>
 			<p
 				className={getNavIconClassName(CHART)}
 				onClick={() => window.open("https://openvino.exchange", "_blank")}
 			>
 				{CHART}
-				<ArrowSmUpIcon className='h-4 rotate-45' />
+				<ArrowSmUpIcon className="h-4 rotate-45" />
 			</p>
 		</div>
 	);
