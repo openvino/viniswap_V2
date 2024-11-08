@@ -36,19 +36,24 @@ import { pairIsWhitelisted } from "../utils/pools-utils";
 
 import { optimismSepolia, optimism } from "thirdweb/chains";
 import useWeb3Store from "../zustand/store";
-import { useActiveAccount, useSendBatchTransaction, } from "thirdweb/react";
+import { useActiveAccount, useSendBatchTransaction } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import {  deposit, withdraw, approve} from "thirdweb/extensions/erc20";
+import { deposit, withdraw, approve } from "thirdweb/extensions/erc20";
 import { thirdwebWethContract } from "../config/thirdwebClient";
 const Swap = () => {
-	
-
-
 	const smartAccount = useActiveAccount();
-	console.log("||||||||||||||||||||||||||||||||",smartAccount, "||||||||||||||||||||||||||||||||");
+	console.log(
+		"||||||||||||||||||||||||||||||||",
+		smartAccount,
+		"||||||||||||||||||||||||||||||||"
+	);
 
-	const { mutate: sendBatch, data:transactionResult, isPending } = useSendBatchTransaction();
-	
+	const {
+		mutate: sendBatch,
+		data: transactionResult,
+		isPending,
+	} = useSendBatchTransaction();
+
 	const {
 		srcToken,
 		setSrcToken,
@@ -79,7 +84,10 @@ const Swap = () => {
 		(state) => state.setTransactionMessage
 	);
 	const transactionMessage = useWeb3Store((state) => state.transactionMessage);
-
+	const initializeValues = () => {
+		setInputValue("");
+		setOutputValue("");
+	};
 	useEffect(() => {
 		const isWhiteListed = pairIsWhitelisted(
 			getCoinAddress(srcToken),
@@ -117,15 +125,18 @@ const Swap = () => {
 			let receipt;
 
 			if (srcToken === WETH && destToken !== WETH) {
-				// receipt = await swapWethToTokens(outputValue);
-				receipt = await swapWethToTokensBatch(outputValue,sendBatch, transactionResult);
+				receipt = await swapWethToTokens(
+					outputValue,
+					getCoinAddress(destToken)
+				);
+
 				if (!receipt) {
 					throw new Error("Transaction failed");
 				}
 				notifySuccess("Swap completed succesfully!");
 				return;
 			} else if (srcToken !== WETH && destToken === WETH) {
-				receipt = await swapTokensToWeth(inputValue);
+				receipt = await swapTokensToWeth(inputValue, getCoinAddress(srcToken));
 				if (!receipt) {
 					throw new Error("Transaction failed");
 				}
@@ -164,15 +175,16 @@ const Swap = () => {
 
 		setSrcToken(destToken);
 		setDestToken(srcToken);
+		initializeValues();
 	}
 
 	return (
-		<div className='p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-20 text-white'>
-			<div className='flex md:px-4'>
+		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-20 text-white">
+			<div className="flex md:px-4">
 				<NavItems />
 			</div>
 
-			<div className='flex items-center justify-between px-1 my-4'>
+			<div className="flex items-center justify-between px-1 my-4">
 				<p>Swap</p>
 
 				{swapOptionsOpen ? (
@@ -182,12 +194,12 @@ const Swap = () => {
 					/>
 				) : (
 					<CogIcon
-						className='h-6 cursor-pointer'
+						className="h-6 cursor-pointer"
 						onClick={() => setSwapOptionsOpen(true)}
 					/>
 				)}
 			</div>
-			<div className='flex bg-[#212429] p-4 py-6 rounded-xl mb-2 border-[2px] border-transparent hover:border-zinc-600'>
+			<div className="flex bg-[#212429] p-4 py-6 rounded-xl mb-2 border-[2px] border-transparent hover:border-zinc-600">
 				<SwapField
 					loading={loading}
 					fieldProps={{
@@ -201,12 +213,12 @@ const Swap = () => {
 				/>
 
 				<CgArrowsExchangeV
-					className='fixed left-1/2 -translate-x-1/2 -translate-y-[-120%] text-[4rem] justify-center  h-10 p-1 bg-[#212429] border-4 border-zinc-900 text-zinc-300 rounded-xl cursor-pointer hover:scale-110'
+					className="fixed left-1/2 -translate-x-1/2 -translate-y-[-120%] text-[4rem] justify-center  h-10 p-1 bg-[#212429] border-4 border-zinc-900 text-zinc-300 rounded-xl cursor-pointer hover:scale-110"
 					onClick={handleReverseExchange}
 				/>
 			</div>
 
-			<div className='bg-[#212429] p-4 py-6 rounded-xl mt-2 border-[2px] border-transparent hover:border-zinc-600'>
+			<div className="bg-[#212429] p-4 py-6 rounded-xl mt-2 border-[2px] border-transparent hover:border-zinc-600">
 				<SwapField
 					loading={loading}
 					fieldProps={{

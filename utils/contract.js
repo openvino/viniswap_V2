@@ -1,30 +1,30 @@
 import { ethers } from "ethers";
 import {
-  bridgeAbi,
-  factoryABI,
-  mtb24ABI,
-  pairABI,
-  routerABI,
-  wethABI,
+	bridgeAbi,
+	factoryABI,
+	mtb24ABI,
+	pairABI,
+	routerABI,
+	wethABI,
 } from "./abi";
 import useWeb3Store from "../zustand/store";
 
 export const mtb24Contract = async (address) => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  if (activeAccount) {
-    console.log(
-      provider,
-      "provider",
-      activeAccount,
-      "activeAccount",
-      signer,
-      "signer"
-    );
-    const contractReader = new ethers.Contract(address, mtb24ABI, signer);
-    return contractReader;
-  }
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+	if (activeAccount) {
+		console.log(
+			provider,
+			"provider",
+			activeAccount,
+			"activeAccount",
+			signer,
+			"signer"
+		);
+		const contractReader = new ethers.Contract(address, mtb24ABI, signer);
+		return contractReader;
+	}
 };
 
 // export const mtb24Contract = async (address) => {
@@ -40,27 +40,27 @@ export const mtb24Contract = async (address) => {
 // };
 
 export const wethContract = async () => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
-  if (activeAccount) {
-    const routerObj = await routerContract();
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+	console.log(
+		provider,
+		"provider",
+		activeAccount,
+		"activeAccount",
+		signer,
+		"signer"
+	);
+	if (activeAccount) {
+		const routerObj = await routerContract();
 
-    const contractReader = new ethers.Contract(
-      process.env.NEXT_PUBLIC_WETH_ADDRESS,
-      wethABI,
-      signer
-    );
-    return contractReader;
-  }
+		const contractReader = new ethers.Contract(
+			process.env.NEXT_PUBLIC_WETH_ADDRESS,
+			wethABI,
+			signer
+		);
+		return contractReader;
+	}
 };
 
 // export const wethContract = async () => {
@@ -82,28 +82,20 @@ export const wethContract = async () => {
 // };
 
 export const routerContract = async () => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
-  if (activeAccount) {
-    const contractReader = new ethers.Contract(
-      process.env.NEXT_PUBLIC_ROUTER,
-      routerABI,
-      signer
-    );
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+	if (activeAccount) {
+		const contractReader = new ethers.Contract(
+			process.env.NEXT_PUBLIC_ROUTER,
+			routerABI,
+			signer
+		);
 
-    return contractReader;
-  } else {
-    console.error("Wallet is not available in the current environment.");
-  }
+		return contractReader;
+	} else {
+		console.error("Wallet is not available in the current environment.");
+	}
 };
 // export const routerContract = async () => {
 //   if (typeof window !== "undefined") {
@@ -136,74 +128,68 @@ export const routerContract = async () => {
 // };
 
 export const factoryContract = async () => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
-  if (activeAccount) {
-    const router = await routerContract();
-    const factoryAddress = await router.factory();
-    return new ethers.Contract(factoryAddress, factoryABI, signer);
-  } else {
-    throw new Error("Ethereum object not found.");
-  }
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+	console.log(
+		provider,
+		"provider",
+		activeAccount,
+		"activeAccount",
+		signer,
+		"signer"
+	);
+	if (activeAccount) {
+		const router = await routerContract();
+		const factoryAddress = await router.factory();
+		return new ethers.Contract(factoryAddress, factoryABI, signer);
+	} else {
+		throw new Error("Ethereum object not found.");
+	}
 };
 
 export const pairContract = async (pairAddress) => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
-  if (activeAccount) {
-    try {
-      return new ethers.Contract(pairAddress, pairABI, signer);
-    } catch (error) {
-      console.error("Failed to get pair contract:", error);
-      throw error;
-    }
-  }
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+
+	if (!pairAddress) throw new Error("Pair address is not provided.");
+	if (activeAccount) {
+		try {
+			return new ethers.Contract(pairAddress, pairABI, signer);
+		} catch (error) {
+			console.error("Failed to get pair contract:", error);
+			throw error;
+		}
+	}
 };
 
 export const mtbContracts = async (address) => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  console.log(
-    provider,
-    "provider",
-    activeAccount,
-    "activeAccount",
-    signer,
-    "signer"
-  );
-  if (activeAccount) {
-    const contractReader = new ethers.Contract(address, mtb24ABI, signer);
-    return contractReader;
-  }
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+	console.log(
+		provider,
+		"provider",
+		activeAccount,
+		"activeAccount",
+		signer,
+		"signer"
+	);
+	if (activeAccount) {
+		const contractReader = new ethers.Contract(address, mtb24ABI, signer);
+		return contractReader;
+	}
 };
 
 export const bridgeContract = async (address) => {
-  const provider = useWeb3Store.getState().provider;
-  const activeAccount = useWeb3Store.getState().activeAccount;
-  const signer = useWeb3Store.getState().signer;
-  if (activeAccount) {
-    const contractReader = new ethers.Contract(address, bridgeAbi, signer);
-    return contractReader;
-  }
+	const provider = useWeb3Store.getState().provider;
+	const activeAccount = useWeb3Store.getState().activeAccount;
+	const signer = useWeb3Store.getState().signer;
+	if (activeAccount) {
+		const contractReader = new ethers.Contract(address, bridgeAbi, signer);
+		return contractReader;
+	}
 };
 
 // import { ethers } from "ethers";
