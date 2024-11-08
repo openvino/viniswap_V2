@@ -103,7 +103,7 @@ const SwapField = ({ fieldProps,loading }) => {
       <Selector
         id={id}
         setToken={setToken}
-        defaultValue={defaultValue}
+        defaultValue={  defaultValue}
         ignoreValue={ignoreValue}
       />
     </div>

@@ -10,7 +10,7 @@ import {
 
 import { toEth } from "../utils/ether-utils";
 import { whitelistedPools } from "../utils/whitelistedPools";
-import { DEFAULT_VALUE, getCoinName } from "../utils/SupportedCoins";
+import { DEFAULT_VALUE, getCoinName, WETH } from "../utils/SupportedCoins";
 import { useActiveAccount } from "thirdweb/react";
 
 export const usePools = () => {
@@ -28,10 +28,15 @@ export const usePools = () => {
 		name: DEFAULT_VALUE,
 		address: "",
 	});
+	console.log({
+		name: WETH,
+		address: process.env.NEXT_PUBLIC_WETH_ADDRESS,
+		account,
+	});
 
 	const [destToken, setDestToken] = useState({
-		name: DEFAULT_VALUE,
-		address: "",
+		name: WETH,
+		address: process.env.NEXT_PUBLIC_WETH_ADDRESS,
 	});
 
 	const [address, setAddress] = useState(null);
@@ -53,29 +58,34 @@ export const usePools = () => {
 		id: "destToken",
 		value: reserves.reverse ? reserves.reserves0 : reserves.reserves1,
 		setValue: setOutputValue,
-		defaultValue: destToken.name,
+		defaultValue: WETH,
 		ignoreValue: srcToken,
 		setToken: setDestToken,
 	};
-
 	useEffect(() => {
 		const fetchPools = async () => {
-			if (!address) {
+			if (!account?.address) {
 				return;
 			}
+
 			try {
 				const factory = await factoryContract();
 				const pairsCount = await factory.allPairsLength();
 
-				const poolsArray = [];
-
+				const pairsPromises = [];
 				for (let i = 0; i < pairsCount; i++) {
-					const pairAddress = await factory.allPairs(i);
+					pairsPromises.push(factory.allPairs(i));
+				}
+
+				const pairAddresses = await Promise.all(pairsPromises);
+
+				const poolDataPromises = pairAddresses.map(async (pairAddress) => {
 					const pairObj = await pairContract(pairAddress);
 					const reserves = await pairObj.getReserves();
 					const tokenAddress0 = await pairObj.token0();
 					const tokenAddress1 = await pairObj.token1();
-					const poolObj = {
+
+					return {
 						address: pairAddress,
 						reserves0: toEth(reserves[0].toString()),
 						reserves1: toEth(reserves[1].toString()),
@@ -85,21 +95,55 @@ export const usePools = () => {
 						name0: getCoinName(tokenAddress0),
 						name1: getCoinName(tokenAddress1),
 					};
-					console.log(
-						"///////////////////////////////////////////////////////",
-						poolObj ? poolObj : "no hay poolobj"
-					);
-					poolsArray.push({ ...poolObj });
-				}
+				});
 
+				const poolsArray = await Promise.all(poolDataPromises);
 				setPools(poolsArray);
+				refreshAmounts();
+				console.log("poolsArray:", poolsArray);
 			} catch (error) {
-				console.error("Failed to fetch pools:", error);
+				console.error("Error fetching pools:", error);
 			}
 		};
 
 		fetchPools();
 	}, [refresh, address]);
+
+	// useEffect(() => {
+	// 	const fetchPools = async () => {
+	// 		if (!account?.address) {
+	// 			return;
+	// 		}
+	// 		let poolsArray = [];
+
+	// 		const factory = await factoryContract();
+	// 		const pairsCount = await factory.allPairsLength();
+
+	// 		for (let i = 0; i < pairsCount; i++) {
+	// 			const pairAddress = await factory.allPairs(i);
+	// 			const pairObj = await pairContract(pairAddress);
+	// 			const reserves = await pairObj.getReserves();
+	// 			const tokenAddress0 = await pairObj.token0();
+	// 			const tokenAddress1 = await pairObj.token1();
+	// 			const poolObj = {
+	// 				address: pairAddress,
+	// 				reserves0: toEth(reserves[0].toString()),
+	// 				reserves1: toEth(reserves[1].toString()),
+	// 				timeStamp: reserves[2].toString(),
+	// 				token0: tokenAddress0,
+	// 				token1: tokenAddress1,
+	// 				name0: getCoinName(tokenAddress0),
+	// 				name1: getCoinName(tokenAddress1),
+	// 			};
+
+	// 			poolsArray.push({ ...poolObj });
+	// 			console.log("poolsArray:", poolsArray);
+	// 		}
+	// 		setPools(poolsArray);
+	// 	};
+
+	// 	fetchPools();
+	// }, [refresh, address]);
 
 	const refreshAmounts = () => {
 		console.log("refreshing reserves...");
