@@ -23,11 +23,11 @@ export default function Home() {
 
 	if (!address)
 		return (
-			<div className='flex justify-center items-center h-screen bg-black'>
+			<div className="flex justify-center items-center h-screen bg-black">
 				<ConnectButton
 					client={client}
-					accountAbstraction={accountAbstraction}
-					 
+					// accountAbstraction={accountAbstraction}
+
 					connectButton={{
 						label: "Connect Wallet",
 						style: {
