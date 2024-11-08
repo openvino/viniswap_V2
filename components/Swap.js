@@ -84,7 +84,10 @@ const Swap = () => {
 		(state) => state.setTransactionMessage
 	);
 	const transactionMessage = useWeb3Store((state) => state.transactionMessage);
-
+	const initializeValues = () => {
+		setInputValue("");
+		setOutputValue("");
+	};
 	useEffect(() => {
 		const isWhiteListed = pairIsWhitelisted(
 			getCoinAddress(srcToken),
@@ -122,7 +125,10 @@ const Swap = () => {
 			let receipt;
 
 			if (srcToken === WETH && destToken !== WETH) {
-				receipt = await swapWethToTokens(outputValue);
+				receipt = await swapWethToTokens(
+					outputValue,
+					getCoinAddress(destToken)
+				);
 
 				if (!receipt) {
 					throw new Error("Transaction failed");
@@ -130,7 +136,7 @@ const Swap = () => {
 				notifySuccess("Swap completed succesfully!");
 				return;
 			} else if (srcToken !== WETH && destToken === WETH) {
-				receipt = await swapTokensToWeth(inputValue);
+				receipt = await swapTokensToWeth(inputValue, getCoinAddress(srcToken));
 				if (!receipt) {
 					throw new Error("Transaction failed");
 				}
@@ -169,6 +175,7 @@ const Swap = () => {
 
 		setSrcToken(destToken);
 		setDestToken(srcToken);
+		initializeValues();
 	}
 
 	return (

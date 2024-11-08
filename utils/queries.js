@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
 	routerContract,
 	mtb24Contract,
@@ -10,64 +10,62 @@ import { getCoinName } from "./SupportedCoins";
 import { bridgeAbi, mtb24ABI, pairABI, routerABI, wethABI } from "./abi";
 import { getPairAddress } from "./whitelistedPools";
 const WETH_ADDRESS = process.env.NEXT_PUBLIC_WETH_ADDRESS;
-const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_MTB24_ADDRESS;
+
 const ROUTER_ADDRESS = process.env.NEXT_PUBLIC_ROUTER;
 
 import useWeb3Store from "../zustand/store";
 import { thirdwebWethContract } from "../config/thirdwebClient";
 // import { deposit } from "thirdweb/extensions/erc20";
 
-
 // SIN USAR sendBatch
 // export const swapWethToTokensBatch = async (tokenAmount) => {
 // 	const wethContract = thirdwebWethContract;
-	
+
 // 	const smartAccount = useWeb3Store.getState().activeAccount;
 // 	if (!smartAccount) return;
-  
+
 // 	const pairAddress = getPairAddress([TOKEN_ADDRESS, WETH_ADDRESS]);
 // 	console.log(pairAddress, "pairAddress");
-  
+
 // 	const exactTokenAmount = Math.floor(tokenAmount);
 // 	console.log(exactTokenAmount);
-  
+
 // 	const routerObj = await routerContract();
 // 	if (!routerObj) {
 // 	  throw new Error("No se pudo obtener el contrato del router");
 // 	}
 // 	console.log(routerObj);
-  
+
 // 	const pairContractObj = await pairContract(pairAddress);
 // 	const reserves = await pairContractObj.getReserves();
 // 	console.log(reserves, "reserves");
-  
+
 // 	const reserveOut = reserves[1];
 // 	const reserveIn = reserves[0];
 // 	console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
-  
+
 // 	const signer = useWeb3Store.getState().signer;
 // 	const initialTokenBalance = await tokenBalance();
 // 	const initialWethBalance = await wethBalance();
 // 	console.log(initialTokenBalance, initialWethBalance);
-  
+
 // 	const amount = ethers.BigNumber.from(toWei(tokenAmount));
 // 	console.log(amount.toString(), reserveIn.toString(), reserveOut.toString());
-  
+
 // 	const amountIn = await routerObj.getAmountIn(amount, reserveIn, reserveOut); // Price
 // 	console.log(toEth(amountIn), "amountIn");
 // 	const amountSlippage = amountIn.mul(120).div(100);
 // 	const finalAmountBN = ethers.utils.parseUnits(amountSlippage.toString(), "wei");
-  
+
 // 	const finalAmount = finalAmountBN.toString();
 // 	console.log(finalAmountBN.toString(), "finalAmountInWei");
-  
+
 // 	// Paso 1: Depositar ETH (wrapping a WETH)
 // 	updateTransactionMessage("STEP 1/3 - Depositing ETH...");
 // 	const deposit = async () => {
 // 		await wrapEth(toEth(finalAmount));
 // 	//   try {
 
-		
 // 	// 	// console.log("Deposit transaction completed: ", receipt);
 // 	// 	// return receipt;
 // 	//   } catch (error) {
@@ -75,7 +73,7 @@ import { thirdwebWethContract } from "../config/thirdwebClient";
 // 	// 	throw error;
 // 	//   }
 // 	};
-  
+
 // 	// Paso 2: Otorgar permisos al router para gastar WETH
 // 	const grantAllowance = async () => {
 // 	  try {
@@ -88,7 +86,7 @@ import { thirdwebWethContract } from "../config/thirdwebClient";
 // 		throw error;
 // 	  }
 // 	};
-  
+
 // 	// Paso 3: Swap de WETH a Tokens
 // 	const swap = async () => {
 // 		updateTransactionMessage("Swapping WETH to tokens...");
@@ -110,20 +108,17 @@ import { thirdwebWethContract } from "../config/thirdwebClient";
 // 		throw error;
 // 	  }
 // 	};
-  
 
 // 	try {
 // 		updateTransactionMessage("STEP 1/3 - Depositing ETH...");
-	
-	
-// 	  await deposit(); 
-	  
+
+// 	  await deposit();
+
 // 		updateTransactionMessage("STEP 2/3 - Granting ETH alowance...");
-		
-	
-// 	  await grantAllowance(); 
+
+// 	  await grantAllowance();
 // 	  updateTransactionMessage("STEP 3/3 - Performing swap...");
-// 	  const receipt = await swap(); 
+// 	  const receipt = await swap();
 // 	  updateTransactionMessage("Transaction completed successfully.");
 // 	  console.log("Batch transaction completed successfully.", receipt);
 // 	  return receipt;
@@ -132,122 +127,111 @@ import { thirdwebWethContract } from "../config/thirdwebClient";
 // 	  throw new Error("Batch transaction failed");
 // 	}
 //   };
-  
 
 // USANDO sendBatch
-export const swapWethToTokensBatch = async (tokenAmount, sendBatch ) => {
-	const wethContract = thirdwebWethContract
+export const swapWethToTokensBatch = async (tokenAmount, sendBatch) => {
+	const wethContract = thirdwebWethContract;
 	updateTransactionMessage("Swapping WETH to tokens...");
 	const smartAccount = useWeb3Store.getState().activeAccount;
 	if (!smartAccount) return;
-	
-		const pairAddress = getPairAddress([TOKEN_ADDRESS, WETH_ADDRESS]);
-		console.log(pairAddress, "pairAddress");
 
-		const exactTokenAmount = Math.floor(tokenAmount);
-		console.log(exactTokenAmount);
+	const pairAddress = getPairAddress([TOKEN_ADDRESS, WETH_ADDRESS]);
+	console.log(pairAddress, "pairAddress");
 
-		const routerObj = await routerContract();
-		if (!routerObj) {
-			throw new Error("No se pudo obtener el contrato del router");
-		}
-		console.log(routerObj);
+	const exactTokenAmount = Math.floor(tokenAmount);
+	console.log(exactTokenAmount);
 
-		const pairContractObj = await pairContract(pairAddress);
-		const reserves = await pairContractObj.getReserves();
-		const reserveOut = reserves[1];
-		const reserveIn = reserves[0];
-		console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
+	const routerObj = await routerContract();
+	if (!routerObj) {
+		throw new Error("No se pudo obtener el contrato del router");
+	}
+	console.log(routerObj);
 
-		const signer = useWeb3Store.getState().signer;
-		const initialTokenBalance = await tokenBalance();
-		const initialWethBalance = await wethBalance();
-		console.log(initialTokenBalance, initialWethBalance);
+	const pairContractObj = await pairContract(pairAddress);
+	const reserves = await pairContractObj.getReserves();
+	const reserveOut = reserves[1];
+	const reserveIn = reserves[0];
+	console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
 
-		const amount = ethers.BigNumber.from(toWei(tokenAmount));
-		console.log(amount.toString(), reserveIn.toString(), reserveOut.toString());
+	const signer = useWeb3Store.getState().signer;
+	const initialTokenBalance = await tokenBalance();
+	const initialWethBalance = await wethBalance();
+	console.log(initialTokenBalance, initialWethBalance);
 
-		const amountIn = await routerObj.getAmountIn(amount, reserveIn, reserveOut); // Price
-		console.log(toEth(amountIn), "amountIn");
-		const amountSlippage = amountIn.mul(120).div(100);
-		const finalAmountBN = ethers.utils.parseUnits(
-			amountSlippage.toString(),
-			"wei"
-		);
+	const amount = ethers.BigNumber.from(toWei(tokenAmount));
+	console.log(amount.toString(), reserveIn.toString(), reserveOut.toString());
 
-		const finalAmount = finalAmountBN.toString();
+	const amountIn = await routerObj.getAmountIn(amount, reserveIn, reserveOut); // Price
+	console.log(toEth(amountIn), "amountIn");
+	const amountSlippage = amountIn.mul(120).div(100);
+	const finalAmountBN = ethers.utils.parseUnits(
+		amountSlippage.toString(),
+		"wei"
+	);
 
-		console.log(finalAmountBN.toString(), "finalAmountInWei");
-		updateTransactionMessage("STEP 1/3 - Depositing ETH...");
-		const deposit = async (amount)=>{
-			const depositReceipt = await wrapEth(toEth(amount));
-		}
+	const finalAmount = finalAmountBN.toString();
 
-		const swap = async () => {
-			try {
-				const gasLimit = ethers.utils.hexlify(500000);
+	console.log(finalAmountBN.toString(), "finalAmountInWei");
+	updateTransactionMessage("STEP 1/3 - Depositing ETH...");
+	const deposit = async (amount) => {
+		const depositReceipt = await wrapEth(toEth(amount));
+	};
+
+	const swap = async () => {
+		try {
+			const gasLimit = ethers.utils.hexlify(500000);
 			const tx = await routerObj
-			.connect(signer)
-			.swapTokensForExactTokens(
-				toWei(tokenAmount),
-				toWei(initialWethBalance),
-				[WETH_ADDRESS, TOKEN_ADDRESS],
-				smartAccount.address,
-				Math.floor(Date.now() / 1000) + 60 * 10,
-				{ gasLimit }
-			);
+				.connect(signer)
+				.swapTokensForExactTokens(
+					toWei(tokenAmount),
+					toWei(initialWethBalance),
+					[WETH_ADDRESS, TOKEN_ADDRESS],
+					smartAccount.address,
+					Math.floor(Date.now() / 1000) + 60 * 10,
+					{ gasLimit }
+				);
 
-		const receipt = await tx.wait();
-		console.log(receipt);
+			const receipt = await tx.wait();
+			console.log(receipt);
 
-		const afterSwapTokenBalance = await tokenBalance();
-		const afterSwapWethBalance = await wethBalance();
+			const afterSwapTokenBalance = await tokenBalance();
+			const afterSwapWethBalance = await wethBalance();
 
-		console.log(afterSwapTokenBalance, afterSwapWethBalance);
+			console.log(afterSwapTokenBalance, afterSwapWethBalance);
 
-		return receipt;
-			} catch (error) {
-				console.log(error);
-				
-			}
-			
+			return receipt;
+		} catch (error) {
+			console.log(error);
 		}
-		const grantAllowance = async (amount)=>{
-			const tx = await increaseWethAllowance(toEth(finalAmountBN.toString()));
-			
-			
-		}
-		// console.log("Deposit receipt: ", depositReceipt);
-		// const depositReceipt = await wrapEth(toEth(finalAmount));
-	
-		
-		const transactions = [
-			deposit(finalAmount),
-			grantAllowance(finalAmount),
-			swap()
-			
-		
-		]
+	};
+	const grantAllowance = async (amount) => {
+		const tx = await increaseWethAllowance(toEth(finalAmountBN.toString()));
+	};
+	// console.log("Deposit receipt: ", depositReceipt);
+	// const depositReceipt = await wrapEth(toEth(finalAmount));
 
-		sendBatch(transactions, {
-			// onError: (error) => {
-			// 	console.log(`Error: ${error.message}`);
-			// },
-			// onSuccess: (result) => {
-			// 	// refetchNFTs();
-			// 	// refetchTokens();
-			// 	console.log("Success! Tx hash: " + result?.transactionHash);
-			// 	console.log(transactionResult);
-				
-			// },
-		});
+	const transactions = [
+		deposit(finalAmount),
+		grantAllowance(finalAmount),
+		swap(),
+	];
+
+	sendBatch(transactions, {
+		// onError: (error) => {
+		// 	console.log(`Error: ${error.message}`);
+		// },
+		// onSuccess: (result) => {
+		// 	// refetchNFTs();
+		// 	// refetchTokens();
+		// 	console.log("Success! Tx hash: " + result?.transactionHash);
+		// 	console.log(transactionResult);
+		// },
+	});
 
 	// ]	await sendBatchTransaction(transactions);
-		// updateTransactionMessage("STEP 2/3 - Granting ETH alowance...");
-		// await increaseWethAllowance(toEth(finalAmountBN.toString()));
-		// updateTransactionMessage("STEP 3/3 - Performing swap...");
-		
-	
+	// updateTransactionMessage("STEP 2/3 - Granting ETH alowance...");
+	// await increaseWethAllowance(toEth(finalAmountBN.toString()));
+	// updateTransactionMessage("STEP 3/3 - Performing swap...");
 };
 // swapWethToTokensBatch(1)
 
@@ -256,7 +240,7 @@ export const updateTransactionMessage = (newMessage) => {
 	setTransactionMessage(newMessage);
 };
 
-export const tokenBalance = async (tokenAddress = TOKEN_ADDRESS) => {
+export const tokenBalance = async (tokenAddress) => {
 	try {
 		const tokenContractObj = await mtb24Contract(tokenAddress);
 		const routerObj = await routerContract();
@@ -293,12 +277,12 @@ export const wethBalance = async () => {
 	}
 };
 
-export const tokenAllowance = async () => {
+export const tokenAllowance = async (tokenAddress) => {
 	try {
 		const routerObj = await routerContract();
 		const activeAccount = useWeb3Store.getState().activeAccount;
 		const walletAddress = activeAccount.address;
-		const tokenContractObj = await mtb24Contract(TOKEN_ADDRESS);
+		const tokenContractObj = await mtb24Contract(tokenAddress);
 		const name = await tokenContractObj.name();
 		const allowance = await tokenContractObj.allowance(
 			walletAddress,
@@ -371,13 +355,15 @@ export const wethAllowance = async () => {
 // 	}
 // };
 
-export const increaseTokenAllowance = async (amount) => {
+export const increaseTokenAllowance = async (amount, tokenAddress) => {
+	console.log(amount, tokenAddress);
+
 	try {
 		const routerObj = await routerContract();
-		const tokenContractObj = await mtb24Contract(TOKEN_ADDRESS);
+		const tokenContractObj = await mtb24Contract(tokenAddress);
 
 		const name = await tokenContractObj.name();
-		const totalAmount = await tokenBalance();
+		const totalAmount = await tokenBalance(tokenAddress);
 		console.log(totalAmount);
 
 		const approvalTx = await tokenContractObj.approve(
@@ -420,12 +406,12 @@ export const increaseWethAllowance = async (amount) => {
 	}
 };
 
-export const getTokenPrice = async (amount = 1) => {
+export const getTokenPrice = async (amount = 1, tokenAddress) => {
 	try {
 		const routerObj = await routerContract();
 		const amountOut = toWei(amount?.toString() || "1");
 
-		const path = [TOKEN_ADDRESS, WETH_ADDRESS];
+		const path = [tokenAddress, WETH_ADDRESS];
 
 		let amounts = await routerObj?.getAmountsOut(amountOut, path);
 
@@ -444,7 +430,6 @@ export const getTokenPrice = async (amount = 1) => {
 };
 export const getPrice = async (address0, address1) => {
 	const pairAddress = getPairAddress([address0, address1]);
-
 
 	try {
 		const pairContractObj = await pairContract(pairAddress);
@@ -474,12 +459,15 @@ export const getPrice = async (address0, address1) => {
 	}
 };
 
-export const swapTokensToWeth = async (tokenAmount) => {
+export const swapTokensToWeth = async (tokenAmount, tokenAddress) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
 
 	try {
 		updateTransactionMessage("STEP 1/3 Granting token allowance...");
-		const allowanceReceipt = await increaseTokenAllowance(tokenAmount);
+		const allowanceReceipt = await increaseTokenAllowance(
+			tokenAmount,
+			tokenAddress
+		);
 		console.log(allowanceReceipt);
 
 		if (!allowanceReceipt) {
@@ -501,7 +489,7 @@ export const swapTokensToWeth = async (tokenAmount) => {
 			0,
 			[
 				//  (from TOKEN_ADDRESS to WETH_ADDRESS)
-				TOKEN_ADDRESS,
+				tokenAddress,
 				WETH_ADDRESS,
 			],
 			activeAccount.address,
@@ -527,11 +515,11 @@ export const swapTokensToWeth = async (tokenAmount) => {
 	}
 };
 
-export const swapWethToTokens = async (tokenAmount) => {
+export const swapWethToTokens = async (tokenAmount, tokenAddress) => {
 	updateTransactionMessage("Swapping WETH to tokens...");
 	const activeAccount = useWeb3Store.getState().activeAccount;
 	try {
-		const pairAddress = getPairAddress([TOKEN_ADDRESS, WETH_ADDRESS]);
+		const pairAddress = getPairAddress([tokenAddress, WETH_ADDRESS]);
 		console.log(pairAddress, "pairAddress");
 
 		const exactTokenAmount = Math.floor(tokenAmount);
@@ -552,14 +540,25 @@ export const swapWethToTokens = async (tokenAmount) => {
 		console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
 
 		const signer = useWeb3Store.getState().signer;
-		const initialTokenBalance = await tokenBalance();
+		const initialTokenBalance = await tokenBalance(tokenAddress);
+		console.log(initialTokenBalance);
+
 		const initialWethBalance = await wethBalance();
 		console.log(initialTokenBalance, initialWethBalance);
 
 		const amount = ethers.BigNumber.from(toWei(tokenAmount));
 		console.log(amount.toString(), reserveIn.toString(), reserveOut.toString());
+		console.log(routerObj, "routerObj");
 
-		const amountIn = await routerObj.getAmountIn(amount, reserveIn, reserveOut); // Price
+		const amountIn = await routerObj.getAmountIn(
+			amount.toString(),
+			reserveIn,
+			reserveOut
+		); // Price
+		// const numerator = reserveIn.mul(tokenAmount).mul(BigNumber.from(1000));
+		// const denominator = reserveOut.sub(tokenAmount).mul(BigNumber.from(995));
+
+		// const amountIn = numerator.div(denominator).add(ethers.constants.One);
 		console.log(toEth(amountIn), "amountIn");
 		const amountSlippage = amountIn.mul(120).div(100);
 		const finalAmountBN = ethers.utils.parseUnits(
@@ -582,7 +581,7 @@ export const swapWethToTokens = async (tokenAmount) => {
 			.swapTokensForExactTokens(
 				toWei(tokenAmount),
 				toWei(initialWethBalance),
-				[WETH_ADDRESS, TOKEN_ADDRESS],
+				[WETH_ADDRESS, tokenAddress],
 				activeAccount.address,
 				Math.floor(Date.now() / 1000) + 60 * 10,
 				{ gasLimit }
@@ -630,27 +629,29 @@ export const addLiquidity = async (
 ) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
 	console.log(activeAccount.address);
-	
+
 	const allowanceAStatus = await allowanceStatus(tokenAAddress);
 	const allowanceBStatus = await allowanceStatus(tokenBAddress);
-console.log(allowanceAStatus, allowanceBStatus);
+	console.log(allowanceAStatus, allowanceBStatus);
 
 	const routerObj = await routerContract();
 	const signer = useWeb3Store.getState().signer;
 	console.log(routerObj, signer);
-	
+
 	if (!routerObj) {
 		console.error("No se pudo obtener el contrato del router");
 		return;
 	}
-console.log(tokenAAddress,
-	tokenBAddress,
-	toWei(amountAdesired.toString()),
-	toWei(amountBdesired.toString()),
-	"0",
-	"0",
-	activeAccount.address,
-	Math.floor(Date.now() / 1000) + 60 * 10);
+	console.log(
+		tokenAAddress,
+		tokenBAddress,
+		toWei(amountAdesired.toString()),
+		toWei(amountBdesired.toString()),
+		"0",
+		"0",
+		activeAccount.address,
+		Math.floor(Date.now() / 1000) + 60 * 10
+	);
 
 	try {
 		const tx = await routerObj
@@ -772,7 +773,6 @@ export const wrapEth = async (amount) => {
 export const unwrapEth = async () => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
 
-	
 	try {
 		const signer = new ethers.providers.Web3Provider(
 			window.ethereum
@@ -799,7 +799,7 @@ export const increaseAllowance = async (amount, token) => {
 			console.log(receipt);
 			return receipt;
 		} else {
-			const receipt = await increaseTokenAllowance(amount);
+			const receipt = await increaseTokenAllowance(amount, token.address);
 			console.log(receipt);
 			return receipt;
 		}

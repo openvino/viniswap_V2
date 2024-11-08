@@ -18,10 +18,8 @@ function MyApp({ Component, pageProps }) {
 
 	return (
 		<ThirdwebProvider>
-			{/* Aseguramos que todo el contenido esté dentro de un contenedor flex con min-h-screen */}
-			<div className='flex flex-col min-h-screen  mb-10'>
-				{/* El contenido crecerá para ocupar el espacio disponible */}
-				<div className='flex-grow'>
+			<div className="flex flex-col min-h-screen  mb-10">
+				<div className="flex-grow">
 					<Component {...pageProps} />
 				</div>
 			</div>
