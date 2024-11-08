@@ -8,7 +8,7 @@ import Header from "../components/Header";
 import useWeb3Store from "../zustand/store";
 import { useEffect } from "react";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
-import { base, baseSepolia, optimismSepolia } from "thirdweb/chains";
+import { base } from "thirdweb/chains";
 import { client } from "../config/thirdwebClient";
 import { useRouter } from "next/router";
 
@@ -28,11 +28,11 @@ const HomeLayout = ({ children }) => {
 			(async () => {
 				const provider = ethers5Adapter.provider.toEthers({
 					client,
-					chain: baseSepolia,
+					chain: base,
 				});
 				const signer = await ethers5Adapter.signer.toEthers({
 					client: client,
-					chain: baseSepolia,
+					chain: base,
 					account: account,
 				});
 
@@ -45,7 +45,7 @@ const HomeLayout = ({ children }) => {
 		}
 	}, [account, activeAccount]);
 	useEffect(() => {
-		if (account) switchChain(baseSepolia);
+		if (account) switchChain(base);
 	}, [account, activeAccount]);
 	return (
 		<div className="flex flex-col min-h-screen  overflow-auto ">

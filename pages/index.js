@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import HomeLayout from "../layout/HomeLayout";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
-import { defineChain, optimismSepolia } from "thirdweb/chains";
-import { accountAbstraction, client } from "../config/thirdwebClient";
+
+import { client } from "../config/thirdwebClient";
 
 export default function Home() {
 	const account = useActiveAccount();
@@ -26,8 +26,6 @@ export default function Home() {
 			<div className="flex justify-center items-center h-screen bg-black">
 				<ConnectButton
 					client={client}
-					// accountAbstraction={accountAbstraction}
-
 					connectButton={{
 						label: "Connect Wallet",
 						style: {

@@ -1,10 +1,10 @@
 import { createThirdwebClient, getContract } from "thirdweb";
-import { baseSepolia } from "thirdweb/chains";
+import { base } from "thirdweb/chains";
 
 // Replace this with your client ID string
 // refer to https://portal.thirdweb.com/typescript/v5/client on how to get a client ID
 const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
-export const chain = baseSepolia;
+export const chain = base;
 
 export const client = createThirdwebClient({
 	clientId: clientId,

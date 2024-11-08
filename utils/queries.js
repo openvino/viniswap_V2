@@ -535,8 +535,8 @@ export const swapWethToTokens = async (tokenAmount, tokenAddress) => {
 		const reserves = await pairContractObj.getReserves();
 
 		console.log(reserves, "reserves");
-		const reserveOut = reserves[1];
-		const reserveIn = reserves[0];
+		const reserveOut = reserves[0];
+		const reserveIn = reserves[1];
 		console.log(toWei(toEth(reserveOut)), toWei(toEth(reserveIn)));
 
 		const signer = useWeb3Store.getState().signer;

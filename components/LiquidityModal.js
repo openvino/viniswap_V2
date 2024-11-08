@@ -45,8 +45,8 @@ const LiquidityModal = ({
 		if (!reserves.reserves0 || !reserves.reserves1) return;
 		const { name, value } = e.target;
 		let price = ethers.utils
-			.parseUnits(reserves.reserves1)
-			.div(ethers.utils.parseUnits(reserves.reserves0));
+			.parseUnits(reserves.reserves0)
+			.div(ethers.utils.parseUnits(reserves.reserves1));
 
 		let newAmounts;
 		if (name === "tokenAAmount") {

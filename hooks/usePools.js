@@ -72,16 +72,13 @@ export const usePools = () => {
 				const factory = await factoryContract();
 				const pairsCount = await factory.allPairsLength();
 
-				// Crear un array de promesas para obtener las direcciones de los pares
 				const pairsPromises = [];
 				for (let i = 0; i < pairsCount; i++) {
 					pairsPromises.push(factory.allPairs(i));
 				}
 
-				// Ejecutar todas las promesas en paralelo
 				const pairAddresses = await Promise.all(pairsPromises);
 
-				// Crear un array de promesas para obtener datos de cada par
 				const poolDataPromises = pairAddresses.map(async (pairAddress) => {
 					const pairObj = await pairContract(pairAddress);
 					const reserves = await pairObj.getReserves();
@@ -100,10 +97,9 @@ export const usePools = () => {
 					};
 				});
 
-				// Ejecutar todas las promesas de pool data en paralelo
 				const poolsArray = await Promise.all(poolDataPromises);
 				setPools(poolsArray);
-
+				refreshAmounts();
 				console.log("poolsArray:", poolsArray);
 			} catch (error) {
 				console.error("Error fetching pools:", error);
