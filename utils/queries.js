@@ -776,9 +776,7 @@ export const unwrapEth = async () => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
 
 	try {
-		const signer = new ethers.providers.Web3Provider(
-			window.ethereum
-		).getSigner();
+		const signer = useWeb3Store.getState().signer;
 		const wethContractObj = new ethers.Contract(WETH_ADDRESS, wethABI, signer);
 		const balance = await wethContractObj.balanceOf(activeAccount.address);
 		console.log(toEth(balance));
@@ -791,7 +789,7 @@ export const unwrapEth = async () => {
 		throw error;
 	}
 };
-unwrapEth();
+
 export const increaseAllowance = async (amount, token) => {
 	try {
 		if (token.name === "ETH") {

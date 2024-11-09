@@ -139,12 +139,13 @@ const Pool = () => {
 				0
 			);
 			console.log("liquidity added", receipt);
+			unwrapEth();
 
 			setTransactionMessage((prev) => `${prev} done.`);
 		} catch (error) {
 			console.log(error);
+			notifyError("Transaction failed", error);
 		}
-		// unwrapEth();
 
 		setIsModalOpen(false);
 		handleRefresh();
