@@ -44,9 +44,18 @@ const LiquidityModal = ({
 	const handleChangeTokenAmount = (e) => {
 		if (!reserves.reserves0 || !reserves.reserves1) return;
 		const { name, value } = e.target;
+		let orderedReserves0, orderedReserves1;
+		if (reserves.name0 === "ETH") {
+			orderedReserves0 = reserves.reserves1;
+			orderedReserves1 = reserves.reserves0;
+		} else {
+			orderedReserves0 = reserves.reserves0;
+			orderedReserves1 = reserves.reserves1;
+		}
+
 		let price = ethers.utils
-			.parseUnits(reserves.reserves0)
-			.div(ethers.utils.parseUnits(reserves.reserves1));
+			.parseUnits(orderedReserves0)
+			.div(ethers.utils.parseUnits(orderedReserves1));
 
 		let newAmounts;
 		if (name === "tokenAAmount") {

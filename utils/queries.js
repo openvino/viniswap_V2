@@ -654,6 +654,7 @@ export const addLiquidity = async (
 	);
 
 	try {
+		const gasLimit = ethers.utils.hexlify(300000);
 		const tx = await routerObj
 			.connect(signer)
 			.addLiquidity(
@@ -664,7 +665,8 @@ export const addLiquidity = async (
 				"0",
 				"0",
 				activeAccount.address,
-				Math.floor(Date.now() / 1000) + 60 * 10
+				Math.floor(Date.now() / 1000) + 60 * 10,
+				{ gasLimit }
 			);
 
 		const receipt = await tx.wait();
@@ -789,12 +791,10 @@ export const unwrapEth = async () => {
 		throw error;
 	}
 };
-
+unwrapEth();
 export const increaseAllowance = async (amount, token) => {
 	try {
 		if (token.name === "ETH") {
-			// const depositReceipt = await wrapEth(amount);
-			// console.log("deposit receipt", depositReceipt);
 			const receipt = await increaseWethAllowance(amount * 1.1);
 			console.log(receipt);
 			return receipt;
