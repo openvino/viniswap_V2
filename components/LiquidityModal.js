@@ -4,6 +4,7 @@ import TransactionStatus from "./TransactionStatus";
 import { ethers } from "ethers";
 import { toEth } from "../utils/ether-utils";
 import { FaPlus, FaMinus } from "react-icons/fa";
+import useWeb3Store from "../zustand/store";
 const LiquidityModal = ({
 	isOpen,
 	onClose,
@@ -20,6 +21,7 @@ const LiquidityModal = ({
 	isLoading,
 	setIsLoading,
 }) => {
+	const isHuman = useWeb3Store((state) => state.isHuman);
 	const [action, setAction] = useState("add");
 	const [amounts, setAmounts] = useState({
 		tokenAAmount: "",
@@ -29,7 +31,6 @@ const LiquidityModal = ({
 	const [removePercentage, setRemovePercentage] = useState(0);
 	const [error, setError] = useState(null);
 
-	// Restablece los valores al abrir el modal
 	useEffect(() => {
 		setAmounts({
 			tokenAAmount: "",
@@ -209,7 +210,7 @@ const LiquidityModal = ({
 									: "w-full p-2 bg-[#44162e] rounded-xl h-[3rem] hover:bg-[#351223] text-gray-300"
 							}
 							onClick={handleAddLiquidity}
-							disabled={isLoading}
+							disabled={isLoading || !isHuman}
 						>
 							{isLoading ? "Processing..." : "Add"}
 						</button>
@@ -248,7 +249,7 @@ const LiquidityModal = ({
 									: "w-full p-2 bg-[#44162e] rounded-xl h-[3rem] hover:bg-[#351223] text-gray-300"
 							}
 							onClick={() => handleRemoveLiquidity(removePercentage)}
-							disabled={isLoading}
+							disabled={isLoading || !isHuman}
 						>
 							{isLoading ? "Processing..." : "Remove"}
 						</button>

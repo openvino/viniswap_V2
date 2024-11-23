@@ -42,12 +42,7 @@ import { deposit, withdraw, approve } from "thirdweb/extensions/erc20";
 import { thirdwebWethContract } from "../config/thirdwebClient";
 const Swap = () => {
 	const smartAccount = useActiveAccount();
-	console.log(
-		"||||||||||||||||||||||||||||||||",
-		smartAccount,
-		"||||||||||||||||||||||||||||||||"
-	);
-
+	const isHuman = useWeb3Store((state) => state.isHuman);
 	const {
 		mutate: sendBatch,
 		data: transactionResult,
@@ -123,6 +118,7 @@ const Swap = () => {
 		setTxPending(true);
 		try {
 			let receipt;
+			console.log(srcToken, destToken);
 
 			if (srcToken === WETH && destToken !== WETH) {
 				receipt = await swapWethToTokens(
@@ -179,7 +175,7 @@ const Swap = () => {
 	}
 
 	return (
-		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-20 text-white">
+		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900  text-white">
 			<div className="flex md:px-4">
 				<NavItems />
 			</div>
@@ -235,8 +231,10 @@ const Swap = () => {
 			<button
 				className={getSwapBtnClassName(swapBtnText)}
 				onClick={() => {
-					if (swapBtnText === SWAP) handleSwap();
-					else if (swapBtnText === CONNECT_WALLET) openConnectModal();
+					if (swapBtnText === SWAP) {
+						isHuman && handleSwap();
+						!isHuman && notifyError("No human detected");
+					} else if (swapBtnText === CONNECT_WALLET) openConnectModal();
 				}}
 			>
 				{swapBtnText}

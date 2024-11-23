@@ -41,9 +41,10 @@ import NavItems from "./NavItems";
 import { getBalances, pairIsWhitelisted } from "../utils/pools-utils";
 import PoolField from "./PoolField";
 import TransactionStatus from "./TransactionStatus";
+import useWeb3Store from "../zustand/store";
 const Pool = () => {
 	const whitelisted = whitelistedPools;
-
+	const isHuman = useWeb3Store((state) => state.isHuman);
 	const {
 		pools,
 		setRefresh,
@@ -82,22 +83,11 @@ const Pool = () => {
 	) => {
 		try {
 			const { token0, token1, reverse } = reserves;
+			console.log(tokenAAmount, tokenBAmount, token0, token1, reverse);
+
 			setTransactionMessage(`Step 1/4: Deposit ETH...`);
 
-			console.log(
-				srcTokenObj.defaultValue === WETH
-					? srcTokenObj.value
-					: destTokenObj.value
-					? destTokenObj.value
-					: 0
-			);
-			const wrapReceipt = await wrapEth(
-				srcTokenObj.defaultValue === WETH
-					? srcTokenObj.value
-					: destTokenObj.defaultValue === WETH
-					? destTokenObj.value
-					: 0
-			);
+			const wrapReceipt = await wrapEth(tokenBAmount);
 			console.log("eth wrapped succesfully", wrapReceipt);
 
 			setTransactionMessage(
@@ -108,7 +98,7 @@ const Pool = () => {
 			if (!allowanceA) {
 				setIsLoading(false);
 				setIsModalOpen(false);
-				// notifyError("Transaction failed");
+				notifyError("Transaction failed");
 
 				return;
 			}
@@ -242,7 +232,6 @@ const Pool = () => {
 					(pool.token0 === destToken.address &&
 						pool.token1 === srcToken.address)
 			);
-			console.log("pool /////////////////////", pool);
 
 			const reverse = pool?.token0 !== srcToken?.address;
 			poolData = { ...pool, reverse: reverse };
@@ -298,7 +287,7 @@ const Pool = () => {
 	};
 
 	return (
-		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-20 text-white ">
+		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-2 text-white ">
 			<div className="flex md:px-4">
 				<NavItems />
 			</div>
@@ -332,7 +321,8 @@ const Pool = () => {
 			<button
 				className={getSwapBtnClassName()}
 				onClick={() => {
-					if (swapBtnText === ADD_OR_REMOVE_LIQUIDITY) handleOpenModal();
+					if (swapBtnText === ADD_OR_REMOVE_LIQUIDITY && isHuman)
+						handleOpenModal();
 					// setIsModalOpen(true);
 					else if (swapBtnText === CONNECT_WALLET) openConnectModal();
 				}}

@@ -83,7 +83,6 @@ export const coinAddresses = [
 	// 	address: "0xc53c298c1f2e85579d4fDf7aFaC2b9429e9DdE58",
 	// },
 ];
-console.log("supported coins", coinAddresses);
 
 export const getCoinAddress = (name) => {
 	const coin = coinAddresses.find((coin) => coin.name === name);

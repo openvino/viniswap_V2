@@ -62,6 +62,7 @@ export const usePools = () => {
 		ignoreValue: srcToken,
 		setToken: setDestToken,
 	};
+
 	useEffect(() => {
 		const fetchPools = async () => {
 			if (!account?.address) {

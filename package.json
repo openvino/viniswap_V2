@@ -21,6 +21,7 @@
     "react-icons": "^5.2.1",
     "react-loader-spinner": "^6.1.6",
     "react-modal": "^3.16.1",
+    "react-turnstile": "^1.1.4",
     "thirdweb": "^5.62.0",
     "zustand": "^5.0.0-rc.2"
   },
