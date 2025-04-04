@@ -26,13 +26,13 @@ export const TurnstileWidget = () => {
 		}
 	};
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setKey((prevKey) => prevKey + 1);
-		}, 60000);
+	// useEffect(() => {
+	// 	const interval = setInterval(() => {
+	// 		setKey((prevKey) => prevKey + 1);
+	// 	}, 60000);
 
-		return () => clearInterval(interval);
-	}, []);
+	// 	return () => clearInterval(interval);
+	// }, []);
 
 	return (
 		<Turnstile
