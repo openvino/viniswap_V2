@@ -42,7 +42,7 @@ import { deposit, withdraw, approve } from "thirdweb/extensions/erc20";
 import { thirdwebWethContract } from "../config/thirdwebClient";
 const Swap = () => {
 	const smartAccount = useActiveAccount();
-	const isHuman = useWeb3Store((state) => state.isHuman);
+	//const isHuman = useWeb3Store((state) => state.isHuman);
 	const {
 		mutate: sendBatch,
 		data: transactionResult,
@@ -90,7 +90,6 @@ const Swap = () => {
 		);
 
 		if (!address) setSwapBtnText(CONNECT_WALLET);
-		// else if (chain?.id !== 11155111) setSwapBtnText(SWITCH_NETWORK);
 		else if (
 			srcToken === DEFAULT_VALUE ||
 			destToken === DEFAULT_VALUE ||
@@ -232,8 +231,9 @@ const Swap = () => {
 				className={getSwapBtnClassName(swapBtnText)}
 				onClick={() => {
 					if (swapBtnText === SWAP) {
-						isHuman && handleSwap();
-						!isHuman && notifyError("No human detected");
+						//isHuman &&
+						handleSwap();
+						//!isHuman && notifyError("No human detected");
 					} else if (swapBtnText === CONNECT_WALLET) openConnectModal();
 				}}
 			>

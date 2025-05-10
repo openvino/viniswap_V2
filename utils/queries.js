@@ -518,11 +518,6 @@ export const swapTokensToWeth = async (tokenAmount, tokenAddress) => {
 export const swapWethToTokens = async (tokenAmount, tokenAddress) => {
 	updateTransactionMessage("Swapping WETH to tokens...");
 	const activeAccount = useWeb3Store.getState().activeAccount;
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
 
 	try {
 		const pairAddress = getPairAddress([tokenAddress, WETH_ADDRESS]);
@@ -621,11 +616,7 @@ export const swapWethToTokens = async (tokenAmount, tokenAddress) => {
 
 export const lpTokenBalance = async (pairAddress) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
+
 	try {
 		const pairContractObj = await pairContract(pairAddress);
 		const routerObj = await routerContract();
@@ -650,11 +641,7 @@ export const addLiquidity = async (
 	amountBMin
 ) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
+
 	console.log(activeAccount.address);
 
 	const allowanceAStatus = await allowanceStatus(tokenAAddress);
@@ -722,11 +709,7 @@ export const removeLiquidity = async (
 	lpAmount
 ) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
+
 	const routerObj = await routerContract();
 
 	const signer = useWeb3Store.getState().signer;
@@ -761,11 +744,7 @@ export const removeLiquidity = async (
 
 export const lpTokenAllowance = async ({ liquidityAmount, address }) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
+
 	console.log(liquidityAmount, address);
 	try {
 		const pairContractObj = await pairContract(address);
@@ -788,11 +767,6 @@ export const lpTokenAllowance = async ({ liquidityAmount, address }) => {
 };
 
 export const wrapEth = async (amount) => {
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
 	const signer = useWeb3Store.getState().signer;
 	if (!amount > 0) return;
 	try {
@@ -816,11 +790,7 @@ export const wrapEth = async (amount) => {
 
 export const unwrapEth = async () => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
-	const isHuman = useWeb3Store.getState().isHuman;
-	if (!isHuman) {
-		console.log("No human detected");
-		return;
-	}
+
 	try {
 		const signer = useWeb3Store.getState().signer;
 		const wethContractObj = new ethers.Contract(WETH_ADDRESS, wethABI, signer);

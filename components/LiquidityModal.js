@@ -21,7 +21,7 @@ const LiquidityModal = ({
 	isLoading,
 	setIsLoading,
 }) => {
-	const isHuman = useWeb3Store((state) => state.isHuman);
+	//const isHuman = useWeb3Store((state) => state.isHuman);
 	const [action, setAction] = useState("add");
 	const [amounts, setAmounts] = useState({
 		tokenAAmount: "",
@@ -75,11 +75,12 @@ const LiquidityModal = ({
 	};
 
 	const handleSlidePercentage = (e) => {
+		console.log(signerBalances);
 		const percentage = e.target.value;
 		setRemovePercentage(percentage);
 
 		const lpBalanceBN = ethers.utils.parseUnits(
-			signerBalances.lpBalance.toString(),
+			signerBalances?.lpBalance?.toString(),
 			18
 		);
 		const newLiquidityAmountBN = lpBalanceBN.mul(percentage).div(100);
@@ -210,7 +211,10 @@ const LiquidityModal = ({
 									: "w-full p-2 bg-[#44162e] rounded-xl h-[3rem] hover:bg-[#351223] text-gray-300"
 							}
 							onClick={handleAddLiquidity}
-							disabled={isLoading || !isHuman}
+							disabled={
+								isLoading
+								//|| !isHuman
+							}
 						>
 							{isLoading ? "Processing..." : "Add"}
 						</button>
@@ -249,7 +253,10 @@ const LiquidityModal = ({
 									: "w-full p-2 bg-[#44162e] rounded-xl h-[3rem] hover:bg-[#351223] text-gray-300"
 							}
 							onClick={() => handleRemoveLiquidity(removePercentage)}
-							disabled={isLoading || !isHuman}
+							disabled={
+								isLoading
+								//|| !isHuman
+							}
 						>
 							{isLoading ? "Processing..." : "Remove"}
 						</button>

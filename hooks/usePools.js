@@ -70,15 +70,17 @@ export const usePools = () => {
 			}
 
 			try {
-				const factory = await factoryContract();
-				const pairsCount = await factory.allPairsLength();
+				const pairAddresses = whitelisted.map((item) => item.address);
 
-				const pairsPromises = [];
-				for (let i = 0; i < pairsCount; i++) {
-					pairsPromises.push(factory.allPairs(i));
-				}
+				// const factory = await factoryContract();
+				// const pairsCount = await factory.allPairsLength();
 
-				const pairAddresses = await Promise.all(pairsPromises);
+				// const pairsPromises = [];
+				// for (let i = 0; i < pairsCount; i++) {
+				// 	pairsPromises.push(factory.allPairs(i))
+				// }
+
+				// const pairAddresses = await Promise.all(pairsPromises);
 
 				const poolDataPromises = pairAddresses.map(async (pairAddress) => {
 					const pairObj = await pairContract(pairAddress);

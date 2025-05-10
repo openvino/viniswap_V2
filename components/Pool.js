@@ -44,7 +44,7 @@ import TransactionStatus from "./TransactionStatus";
 import useWeb3Store from "../zustand/store";
 const Pool = () => {
 	const whitelisted = whitelistedPools;
-	const isHuman = useWeb3Store((state) => state.isHuman);
+	//const isHuman = useWeb3Store((state) => state.isHuman);
 	const {
 		pools,
 		setRefresh,
@@ -321,10 +321,13 @@ const Pool = () => {
 			<button
 				className={getSwapBtnClassName()}
 				onClick={() => {
-					if (swapBtnText === ADD_OR_REMOVE_LIQUIDITY && isHuman)
+					if (
+						swapBtnText === ADD_OR_REMOVE_LIQUIDITY
+						// && isHuman
+					) {
 						handleOpenModal();
-					// setIsModalOpen(true);
-					else if (swapBtnText === CONNECT_WALLET) openConnectModal();
+						setIsModalOpen(true);
+					} else if (swapBtnText === CONNECT_WALLET) openConnectModal();
 				}}
 			>
 				{swapBtnText}
