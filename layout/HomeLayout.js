@@ -11,7 +11,7 @@ import { ethers5Adapter } from "thirdweb/adapters/ethers5";
 import { base } from "thirdweb/chains";
 import { client } from "../config/thirdwebClient";
 import { useRouter } from "next/router";
-import { TurnstileWidget } from "../components/turnstileWidget";
+// import { TurnstileWidget } from "../components/turnstileWidget";
 
 const HomeLayout = ({ children }) => {
 	const account = useActiveAccount();
@@ -59,9 +59,9 @@ const HomeLayout = ({ children }) => {
 
 				<div className="flex justify-center px-2 md:px-16">{children}</div>
 
-				<div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-4 ">
+				{/* <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-4 ">
 					<TurnstileWidget />
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);
