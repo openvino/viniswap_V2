@@ -9,6 +9,7 @@ const NavItems = () => {
 	const POOL = "Pool";
 	const BRIDGE = "Bridge";
 	const CHART = "Exchange";
+	const DAO = "DAO";
 
 	const [selectedNavItem, setSelectedNavItem] = useState(SWAP);
 
@@ -35,12 +36,10 @@ const NavItems = () => {
 			<p className={getNavIconClassName(POOL)} onClick={handleNavigate(POOL)}>
 				{POOL}
 			</p>
-			{/* <p
-				className={getNavIconClassName(BRIDGE)}
-				onClick={handleNavigate(BRIDGE)}
-			>
-				{BRIDGE}
-			</p> */}
+			<p className={getNavIconClassName(DAO)} onClick={handleNavigate(DAO)}>
+				{DAO}
+			</p>
+			
 			<p
 				className={getNavIconClassName(CHART)}
 				onClick={() => window.open("https://openvino.exchange", "_blank")}
@@ -52,14 +51,15 @@ const NavItems = () => {
 	);
 
 	function getNavIconClassName(name) {
-		let className =
-			"p-1 px-2 cursor-pointer border-[4px] border-transparent flex items-center text-white";
-		className +=
-			name === selectedNavItem
-				? " bg-zinc-800 border-zinc-900 rounded-full"
-				: "";
-		return className;
-	}
+	let className =
+		"p-1 px-2 cursor-pointer border-[4px] border-transparent flex items-center text-white";
+	className +=
+		name.toLowerCase() === selectedNavItem.toLowerCase()
+			? " bg-zinc-800 border-zinc-900 rounded-full"
+			: "";
+	return className;
+}
+
 };
 
 export default NavItems;

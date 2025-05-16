@@ -8,7 +8,7 @@ import Header from "../components/Header";
 import useWeb3Store from "../zustand/store";
 import { useEffect, useState } from "react";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
-import { base } from "thirdweb/chains";
+import { base, baseSepolia } from "thirdweb/chains";
 import { client } from "../config/thirdwebClient";
 import { useRouter } from "next/router";
 // import { TurnstileWidget } from "../components/turnstileWidget";
@@ -47,7 +47,9 @@ const HomeLayout = ({ children }) => {
 		}
 	}, [account, activeAccount]);
 	useEffect(() => {
-		if (account) switchChain(base);
+	
+		
+		if (account) switchChain(baseSepolia);
 	}, [account, activeAccount]);
 
 	return (
