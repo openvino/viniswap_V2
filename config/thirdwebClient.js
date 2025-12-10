@@ -12,11 +12,7 @@ export const client = createThirdwebClient({
 	clientId: clientId,
 });
 
-// export const accountAbstraction = {
-// 	chain,
-// 	factoryAddress: process.env.NEXT_PUBLIC_ACCOUNT_FACTORY,
-// 	sponsorGas: true,
-// }
+
 
 export const thirdwebRouterContract = getContract({
 	address: process.env.NEXT_PUBLIC_ROUTER,
@@ -31,7 +27,7 @@ export const thirdwebWethContract = getContract({
 });
 
 export const crowdsaleOvi = getContract({
-	address: '0x1A41a301CA7Aa3d69d1cb1dD2Ff46Fc7094AF01A',
+	address: '0x12cDDc18FC9d9aDB639bC30e156cA7181834341e',
 	chain: baseSepolia,
 	abi:crowdsaleOviABI,
 	client,
