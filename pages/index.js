@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import HomeLayout from "../layout/HomeLayout";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 
-import { client } from "../config/thirdwebClient";
+import { chain, client } from "../config/thirdwebClient";
 
 export default function Home() {
 	const account = useActiveAccount();
@@ -20,12 +20,12 @@ export default function Home() {
 			router.push("/swap");
 		}
 	}, [address, router]);
-
 	if (!address)
 		return (
 			<div className="flex justify-center items-center h-screen bg-black">
 				<ConnectButton
 					client={client}
+					chain={chain}
 					connectButton={{
 						label: "Connect Wallet",
 						style: {
