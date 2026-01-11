@@ -27,8 +27,8 @@ export const thirdwebWethContract = getContract({
 });
 
 export const crowdsaleOvi = getContract({
-	address: '0x12cDDc18FC9d9aDB639bC30e156cA7181834341e',
-	chain: baseSepolia,
+	address: process.env.NEXT_PUBLIC_CROWDSALE_DAO_ADDRESS ,
+	chain: chain,
 	abi:crowdsaleOviABI,
 	client,
 })
