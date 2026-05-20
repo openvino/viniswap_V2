@@ -8,6 +8,22 @@ import { useState, useEffect, useMemo } from "react";
 import { prepareContractCall, toWei } from "thirdweb";
 import { ethers } from "ethers";
 
+const formatUsd = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "Calculating…";
+  if (amount === 0) return "$0 USD";
+
+  const absAmount = Math.abs(amount);
+  const maximumFractionDigits = absAmount < 0.000001 ? 18 : 12;
+
+  return `${amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits,
+  })} USD`;
+};
+
 export default function Index() {
   const [tokenAmount, setTokenAmount] = useState("1");
   const [usdTotal, setUsdTotal] = useState(0);
@@ -226,7 +242,7 @@ export default function Index() {
         <div className="text-sm space-y-1">
           <p className="text-zinc-300">
             <span className="font-medium text-white">Price per token:</span>{" "}
-            {rateLoading ? "…" : `$${rate.toFixed(2)} USD`}
+            {rateLoading ? "…" : formatUsd(rate)}
           </p>
           <p className="text-zinc-300">
             <span className="font-medium text-white">With 1 ETH you get:</span>{" "}
@@ -234,7 +250,9 @@ export default function Index() {
           </p>
           <p className="text-zinc-300">
             <span className="font-medium text-white">Total:</span>{" "}
-            {usdTotal === 0 ? "Calculating…" : `$${usdTotal.toFixed(2)} USD`}
+            {ethNeeded === null || !ethUsdPriceData
+              ? "Calculating…"
+              : formatUsd(usdTotal)}
           </p>
           <p className="text-zinc-300">
             <span className="font-medium text-white">You will send:</span>{" "}
