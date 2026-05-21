@@ -7,20 +7,16 @@ export const getPools = async () => {
     );
 
     if (network.rows.length === 0) {
-      console.log("No active network found");
       return null;
     }
 
     const networkId = network.rows[0].id;
 
-    console.log(networkId);
-    console.log(typeof networkId);
 
     const pools = await conn.query(`SELECT * FROM pools WHERE network_id=$1`, [
       networkId,
     ]);
 
-    console.log(pools.rows);
 
     return pools;
   } catch (error) {

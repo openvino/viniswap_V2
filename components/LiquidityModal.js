@@ -75,7 +75,6 @@ const LiquidityModal = ({
 	};
 
 	const handleSlidePercentage = (e) => {
-		console.log(signerBalances);
 		const percentage = e.target.value;
 		setRemovePercentage(percentage);
 
@@ -207,8 +206,8 @@ const LiquidityModal = ({
 						<button
 							className={
 								isLoading
-									? "w-full p-2 bg-[#1a0911ad] rounded-xl h-[3rem] text-[#000000]"
-									: "w-full p-2 bg-[#44162e] rounded-xl h-[3rem] hover:bg-[#351223] text-gray-300"
+									? "w-full p-2 bg-zinc-700 opacity-60 rounded-xl h-[3rem] text-white cursor-not-allowed"
+									: "w-full p-2 bg-[#840c4a] hover:bg-[#9e1058] rounded-xl h-[3rem] font-semibold text-white shadow-lg shadow-[#840c4a]/30 transition-all duration-200"
 							}
 							onClick={handleAddLiquidity}
 							disabled={
@@ -249,8 +248,8 @@ const LiquidityModal = ({
 						<button
 							className={
 								isLoading
-									? "w-full p-2 bg-[#1a0911ad] rounded-xl h-[3rem] text-[#000000]"
-									: "w-full p-2 bg-[#44162e] rounded-xl h-[3rem] hover:bg-[#351223] text-gray-300"
+									? "w-full p-2 bg-zinc-700 opacity-60 rounded-xl h-[3rem] text-white cursor-not-allowed"
+									: "w-full p-2 bg-[#840c4a] hover:bg-[#9e1058] rounded-xl h-[3rem] font-semibold text-white shadow-lg shadow-[#840c4a]/30 transition-all duration-200"
 							}
 							onClick={() => handleRemoveLiquidity(removePercentage)}
 							disabled={

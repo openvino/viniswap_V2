@@ -28,11 +28,6 @@ export const usePools = () => {
 		name: DEFAULT_VALUE,
 		address: "",
 	});
-	console.log({
-		name: WETH,
-		address: process.env.NEXT_PUBLIC_WETH_ADDRESS,
-		account,
-	});
 
 	const [destToken, setDestToken] = useState({
 		name: WETH,
@@ -103,7 +98,6 @@ export const usePools = () => {
 				const poolsArray = await Promise.all(poolDataPromises);
 				setPools(poolsArray);
 				refreshAmounts();
-				console.log("poolsArray:", poolsArray);
 			} catch (error) {
 				console.error("Error fetching pools:", error);
 			}
@@ -140,8 +134,7 @@ export const usePools = () => {
 	// 			};
 
 	// 			poolsArray.push({ ...poolObj });
-	// 			console.log("poolsArray:", poolsArray);
-	// 		}
+	//	// 		}
 	// 		setPools(poolsArray);
 	// 	};
 
@@ -149,7 +142,6 @@ export const usePools = () => {
 	// }, [refresh, address]);
 
 	const refreshAmounts = () => {
-		console.log("refreshing reserves...");
 		if (!refreshDisabled) {
 			setRefresh(refresh + 1);
 			setRefreshDisabled(true);

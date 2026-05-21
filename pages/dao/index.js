@@ -1,310 +1,222 @@
-import Image from "next/image";
 import NavItems from "../../components/NavItems";
 import HomeLayout from "../../layout/HomeLayout";
-import OviTokenInput from "../../components/OviTokenInput";
-import { useReadContract, useSendTransaction } from "thirdweb/react";
+import { useReadContract, useSendTransaction, useActiveAccount } from "thirdweb/react";
 import { crowdsaleOvi } from "../../config/thirdwebClient";
 import { useState, useEffect, useMemo } from "react";
 import { prepareContractCall, toWei } from "thirdweb";
 import { ethers } from "ethers";
+import toast, { Toaster } from "react-hot-toast";
+
+const QUICK_AMOUNTS = [100, 500, 1000, 5000];
 
 const formatUsd = (value) => {
   const amount = Number(value);
-  if (!Number.isFinite(amount)) return "Calculating…";
-  if (amount === 0) return "$0 USD";
-
-  const absAmount = Math.abs(amount);
-  const maximumFractionDigits = absAmount < 0.000001 ? 18 : 12;
-
-  return `${amount.toLocaleString("en-US", {
+  if (!Number.isFinite(amount) || amount === 0) return null;
+  return amount.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
-    maximumFractionDigits,
-  })} USD`;
+    maximumFractionDigits: 2,
+  });
 };
 
 export default function Index() {
-  const [tokenAmount, setTokenAmount] = useState("1");
+  const account = useActiveAccount();
+  const [tokenAmount, setTokenAmount] = useState("");
   const [usdTotal, setUsdTotal] = useState(0);
   const [ethNeeded, setEthNeeded] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(1);
   const [tokensSold, setTokensSold] = useState(0);
   const [phaseOneCap, setPhaseOneCap] = useState(0);
-  const [txMessage, setTxMessage] = useState(null);
   const [tokensAvailable, setTokensAvailable] = useState(0);
 
-  // Leer tarifas y datos de contrato
-  const { data: rateData, isLoading: rateLoading } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "getRate",
-    queryOptions: { refetchInterval: 15000 },
-  });
-
   const sanitizedTokenAmount =
-    tokenAmount === "" || tokenAmount === "."
-      ? "0"
-      : tokenAmount.endsWith(".")
-      ? tokenAmount.slice(0, -1)
-      : tokenAmount;
+    tokenAmount === "" || tokenAmount === "." ? "0"
+    : tokenAmount.endsWith(".") ? tokenAmount.slice(0, -1)
+    : tokenAmount;
 
   const weiAmountParam = useMemo(() => {
-    try {
-      return ethers.utils.parseUnits(sanitizedTokenAmount, 18).toString();
-    } catch (err) {
-      return "0";
-    }
+    try { return ethers.utils.parseUnits(sanitizedTokenAmount, 18).toString(); }
+    catch { return "0"; }
   }, [sanitizedTokenAmount]);
 
-  const {
-    data: tokensPerEthData,
-    isLoading: tokensPerEthLoading,
-    refetch: refetchTokensPerEth,
-  } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "getTokenAmount",
-    params: [ethers.utils.parseEther("1").toString()],
-    queryOptions: { refetchInterval: 15000 },
-  });
-
-  const {
-    data: weiAmountData,
-    isLoading: weiAmountLoading,
-    refetch: refetchWeiAmount,
-  } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "getWeiAmount",
-    params: [
-      weiAmountParam,
-    ],
-  });
-
-  const {
-    data: ethUsdPriceData,
-    refetch: refetchEthUsdPrice,
-  } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "getEthUsdPrice",
-    queryOptions: { refetchInterval: 15000 },
-  });
-
-  const {
-    data: tokensSoldData,
-    refetch: refetchTokensSold,
-  } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "tokensSold",
-    queryOptions: { refetchInterval: 15000 },
-  });
-
-  const {
-    data: phaseOneTokenCapData,
-    refetch: refetchPhaseOneCap,
-  } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "phaseOneTokenCap",
-    queryOptions: { refetchInterval: 15000 },
-  });
-
-  const {
-    data: crowdsaleBalanceData,
-    isLoading: crowdsaleBalanceLoading,
-    refetch: refetchCrowdsaleBalance,
-  } = useReadContract({
-    contract: crowdsaleOvi,
-    method: "balanceOfCrowdsale",
-    queryOptions: { refetchInterval: 15000 },
-  });
-
-  useEffect(() => {
-    if (ethNeeded && ethUsdPriceData && !isNaN(Number(ethNeeded))) {
-      const ethUsd = Number(ethers.utils.formatUnits(ethUsdPriceData, 18));
-      const usd = parseFloat(ethNeeded) * ethUsd;
-      setUsdTotal(usd);
-    } else {
-      setUsdTotal(0);
-    }
-  }, [ethNeeded, ethUsdPriceData]);
+  const { data: rateData } = useReadContract({ contract: crowdsaleOvi, method: "getRate", queryOptions: { refetchInterval: 15000 } });
+  const { data: tokensPerEthData, isLoading: tokensPerEthLoading } = useReadContract({ contract: crowdsaleOvi, method: "getTokenAmount", params: [ethers.utils.parseEther("1").toString()], queryOptions: { refetchInterval: 15000 } });
+  const { data: weiAmountData, isLoading: weiAmountLoading, refetch: refetchWeiAmount } = useReadContract({ contract: crowdsaleOvi, method: "getWeiAmount", params: [weiAmountParam] });
+  const { data: ethUsdPriceData, refetch: refetchEthUsdPrice } = useReadContract({ contract: crowdsaleOvi, method: "getEthUsdPrice", queryOptions: { refetchInterval: 15000 } });
+  const { data: tokensSoldData, refetch: refetchTokensSold } = useReadContract({ contract: crowdsaleOvi, method: "tokensSold", queryOptions: { refetchInterval: 15000 } });
+  const { data: phaseOneTokenCapData, refetch: refetchPhaseOneCap } = useReadContract({ contract: crowdsaleOvi, method: "phaseOneTokenCap", queryOptions: { refetchInterval: 15000 } });
+  const { data: crowdsaleBalanceData, isLoading: crowdsaleBalanceLoading, refetch: refetchCrowdsaleBalance } = useReadContract({ contract: crowdsaleOvi, method: "balanceOfCrowdsale", queryOptions: { refetchInterval: 15000 } });
 
   const rate = rateData ? Number(rateData) / 1e18 : 0;
-  const tokensPerEth = tokensPerEthData
-    ? Number(ethers.utils.formatUnits(tokensPerEthData, 18))
-    : 0;
-  const crowdsaleBalance = crowdsaleBalanceData
-    ? Number(ethers.utils.formatUnits(crowdsaleBalanceData, 18))
-    : 0;
+  const tokensPerEth = tokensPerEthData ? Number(ethers.utils.formatUnits(tokensPerEthData, 18)) : 0;
+  const crowdsaleBalance = crowdsaleBalanceData ? Number(ethers.utils.formatUnits(crowdsaleBalanceData, 18)) : 0;
+  const ethUsdPrice = ethUsdPriceData ? Number(ethers.utils.formatUnits(ethUsdPriceData, 18)) : 0;
 
-  // Convertir bigNumbers a números y calcular progreso
+  useEffect(() => {
+    if (ethNeeded && ethUsdPrice) setUsdTotal(parseFloat(ethNeeded) * ethUsdPrice);
+    else setUsdTotal(0);
+  }, [ethNeeded, ethUsdPrice]);
+
   useEffect(() => {
     const sold = Number(ethers.utils.formatUnits(tokensSoldData || 0, 18));
     const cap = Number(ethers.utils.formatUnits(phaseOneTokenCapData || 0, 18));
     setTokensSold(sold);
     setPhaseOneCap(cap);
-
-    if (cap === 0) {
-      setProgressPercent(0);
-      return;
+    if (cap > 0) {
+      setCurrentPhase(sold >= cap ? 2 : 1);
+      setProgressPercent(Math.min((sold / cap) * 100, 100));
     }
-
-    const phase = sold >= cap ? 2 : 1;
-    setCurrentPhase(phase);
-
-    const progress = Math.min((sold / cap) * 100, 100);
-    setProgressPercent(progress);
   }, [tokensSoldData, phaseOneTokenCapData]);
 
-  useEffect(() => {
-    setTokensAvailable(crowdsaleBalance);
-  }, [crowdsaleBalance]);
+  useEffect(() => { setTokensAvailable(crowdsaleBalance); }, [crowdsaleBalance]);
 
   useEffect(() => {
-    const asNumber = Number(sanitizedTokenAmount);
-    if (asNumber > tokensAvailable && tokensAvailable > 0) {
-      setTokenAmount(tokensAvailable.toString());
-    }
-  }, [tokensAvailable, sanitizedTokenAmount]);
-
-  // Cálculo de USD total y ETH necesario
-  useEffect(() => {
-    if (!weiAmountLoading && weiAmountData && Number(sanitizedTokenAmount) > 0) {
-      const ethFormatted = ethers.utils.formatEther(weiAmountData.toString());
-      setEthNeeded(ethFormatted);
-    } else {
-      setEthNeeded(null);
-    }
+    if (!weiAmountLoading && weiAmountData && Number(sanitizedTokenAmount) > 0)
+      setEthNeeded(ethers.utils.formatEther(weiAmountData.toString()));
+    else setEthNeeded(null);
   }, [weiAmountLoading, weiAmountData, sanitizedTokenAmount]);
 
-  const isReady =
-    ethNeeded !== null &&
-    Number(ethNeeded) > 0 &&
-    tokensAvailable > 0 &&
-    Number(sanitizedTokenAmount) > 0 &&
-    Number(sanitizedTokenAmount) <= tokensAvailable;
+  const isReady = ethNeeded !== null && Number(ethNeeded) > 0 && tokensAvailable > 0
+    && Number(sanitizedTokenAmount) > 0 && Number(sanitizedTokenAmount) <= tokensAvailable;
 
-  // Enviar transacción
-  const { mutateAsync: sendTransaction, isLoading: txLoading } =
-    useSendTransaction();
+  const { mutateAsync: sendTransaction, isLoading: txLoading } = useSendTransaction();
 
   const handleBuyTokens = async () => {
     if (!isReady) return;
-    setTxMessage(null);
-
-    const tx = prepareContractCall({
-      contract: crowdsaleOvi,
-      method: "buyTokens",
-      value: toWei(ethNeeded),
-    });
-
     try {
-      const result = await sendTransaction(tx);
-      console.log("Transaction sent:", result);
-      setTxMessage("Compra enviada. Esperando confirmación...");
-      // refrescar datos on-chain tras la compra
+      const tx = prepareContractCall({ contract: crowdsaleOvi, method: "buyTokens", value: toWei(ethNeeded) });
+      await sendTransaction(tx);
+      toast.success("Purchase confirmed!");
+      setTokenAmount("");
       await Promise.allSettled([
-        refetchTokensSold?.(),
-        refetchPhaseOneCap?.(),
-        refetchWeiAmount?.(),
-        refetchTokensPerEth?.(),
-        refetchEthUsdPrice?.(),
-        refetchCrowdsaleBalance?.(),
+        refetchTokensSold?.(), refetchPhaseOneCap?.(), refetchWeiAmount?.(),
+        refetchEthUsdPrice?.(), refetchCrowdsaleBalance?.(),
       ]);
-      setTxMessage("Compra confirmada. Datos actualizados.");
     } catch (err) {
-      console.error("Transaction error:", err);
-      setTxMessage("Error al procesar la compra. Revisa la consola.");
+      toast.error("Transaction failed. Please try again.", { duration: 6000 });
     }
   };
 
+  const handleQuickAmount = (amount) => {
+    if (amount <= tokensAvailable) setTokenAmount(amount.toString());
+  };
+
+  const btnLabel = !account ? "Connect wallet"
+    : txLoading ? "Processing..."
+    : isReady ? "Buy OVI"
+    : Number(sanitizedTokenAmount) === 0 || tokenAmount === "" ? "Enter an amount"
+    : "Calculating…";
+
+  const btnActive = account && isReady && !txLoading;
+
   return (
     <HomeLayout>
-      <div className="p-6 rounded-3xl w-full max-w-[480px] bg-zinc-800 text-white shadow-lg mx-auto mt-24 space-y-6">
-        <NavItems />
-
-        <h2 className="text-2xl text-center font-bold tracking-wide">
-          Buy OVI Tokens
-        </h2>
-
-        <div className="flex justify-center">
-          <Image
-            src="/tokens/token.png"
-            width={200}
-            height={200}
-            alt="OVI Token"
-            className="rounded-full"
-          />
+      <div className="p-5 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 text-white mb-24">
+        {/* Nav */}
+        <div className="flex md:px-4 mb-4">
+          <NavItems />
         </div>
 
-        <div className="bg-zinc-700 p-5 rounded-xl border border-zinc-600">
-          <OviTokenInput value={tokenAmount} onChange={setTokenAmount} />
+        <div className="flex items-center justify-between px-1 mb-4">
+          <p>Buy OVI</p>
         </div>
 
-        <div className="text-sm space-y-1">
-          <p className="text-zinc-300">
-            <span className="font-medium text-white">Price per token:</span>{" "}
-            {rateLoading ? "…" : formatUsd(rate)}
+        {/* Main input */}
+        <div className="bg-[#212429] p-4 py-6 rounded-xl mb-2 border-[2px] border-transparent hover:border-zinc-600">
+          <p className="text-xs text-zinc-500 mb-3">You buy</p>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={tokenAmount}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (/^\d*\.?\d*$/.test(v)) setTokenAmount(v);
+              }}
+              placeholder="0"
+              className="bg-transparent outline-none text-3xl text-white w-full placeholder-zinc-600"
+            />
+            <div className="flex items-center gap-2 bg-zinc-700 px-3 py-2 rounded-2xl flex-shrink-0">
+              <img src="/tokens/token.png" alt="OVI" className="w-5 h-5 rounded-full object-cover" />
+              <span className="text-white font-semibold text-sm whitespace-nowrap">OVI</span>
+            </div>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2 h-4">
+            {formatUsd(usdTotal) ?? ""}
           </p>
-          <p className="text-zinc-300">
-            <span className="font-medium text-white">With 1 ETH you get:</span>{" "}
-            {tokensPerEthLoading ? "…" : `${tokensPerEth.toLocaleString()} OVI`}
-          </p>
-          <p className="text-zinc-300">
-            <span className="font-medium text-white">Total:</span>{" "}
-            {ethNeeded === null || !ethUsdPriceData
-              ? "Calculating…"
-              : formatUsd(usdTotal)}
-          </p>
-          <p className="text-zinc-300">
-            <span className="font-medium text-white">You will send:</span>{" "}
-            {ethNeeded === null ? "Calculating…" : `${ethNeeded} ETH`}
-          </p>
+          {/* Quick amounts */}
+          <div className="flex gap-2 mt-4">
+            {QUICK_AMOUNTS.map((amt) => (
+              <button
+                key={amt}
+                onClick={() => handleQuickAmount(amt)}
+                className="flex-1 py-1.5 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+              >
+                {amt.toLocaleString()}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="text-sm text-zinc-300 space-y-1">
-          <p>
-            <span className="font-medium text-white">Current phase:</span>{" "}
-            {currentPhase === 1 ? "Phase 1" : "Phase 2"}
-          </p>
-          <p>
-            <span className="font-medium text-white">Sold:</span>{" "}
-            {Math.ceil(tokensSold).toLocaleString()} /{" "}
-            {Math.ceil(phaseOneCap).toLocaleString()} OVI
-          </p>
-          <p>
-            <span className="font-medium text-white">Tokens disponibles:</span>{" "}
-            {crowdsaleBalanceLoading
-              ? "…"
-              : Math.floor(tokensAvailable).toLocaleString()}{" "}
-            OVI
-          </p>
+        {/* ETH to pay */}
+        <div className="bg-[#212429] p-4 py-6 rounded-xl mt-2 border-[2px] border-transparent hover:border-zinc-600">
+          <p className="text-xs text-zinc-500 mb-3">You pay</p>
+          <div className="flex items-center gap-3">
+            <p className="text-3xl text-white w-full">
+              {weiAmountLoading && tokenAmount !== ""
+                ? <span className="text-zinc-500 text-xl">Calculating…</span>
+                : ethNeeded && Number(ethNeeded) > 0
+                  ? parseFloat(ethNeeded).toFixed(8).replace(/\.?0+$/, "")
+                  : <span className="text-zinc-600">0</span>
+              }
+            </p>
+            <div className="flex items-center gap-2 bg-zinc-700 px-3 py-2 rounded-2xl flex-shrink-0">
+              <img src="/eth.png" alt="ETH" className="w-5 h-5 rounded-full object-cover" />
+              <span className="text-white font-semibold text-sm">ETH</span>
+            </div>
+          </div>
+          {tokensPerEth > 0 && (
+            <p className="text-xs text-zinc-500 mt-2">
+              1 ETH = {tokensPerEth.toLocaleString()} OVI
+              {rate > 0 && ` · ${formatUsd(rate)} per token`}
+            </p>
+          )}
         </div>
 
-        <div className="w-full h-4 bg-zinc-600 rounded-full overflow-hidden mt-1">
-          <div
-            className="h-full bg-emerald-500 transition-all duration-500 ease-in-out"
-            style={{ width: `${progressPercent}%` }}
-          ></div>
+        {/* Sale info */}
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs text-zinc-400 px-1">
+            <span>Phase {currentPhase}</span>
+            <span>{Math.ceil(tokensSold).toLocaleString()} / {Math.ceil(phaseOneCap).toLocaleString()} OVI sold</span>
+          </div>
+          <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#840c4a] rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs text-zinc-500 px-1">
+            <span>{progressPercent.toFixed(1)}% sold</span>
+            <span>{crowdsaleBalanceLoading ? "…" : Math.floor(tokensAvailable).toLocaleString()} OVI available</span>
+          </div>
         </div>
 
+        {/* Buy button */}
         <button
           onClick={handleBuyTokens}
-          disabled={!isReady || txLoading}
-          className={`w-full py-3 mt-4 rounded-xl text-lg font-semibold transition 
-                ${
-                  isReady && !txLoading
-                    ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                    : "bg-zinc-600 text-zinc-300 cursor-not-allowed"
-                }`}
+          disabled={!btnActive}
+          className={`p-4 w-full my-4 rounded-xl font-semibold text-base transition-all duration-200 text-white ${
+            btnActive
+              ? "bg-[#840c4a] hover:bg-[#9e1058] shadow-lg shadow-[#840c4a]/30 cursor-pointer"
+              : "bg-zinc-700 opacity-60 pointer-events-none"
+          }`}
         >
-          {txLoading
-            ? "Processing..."
-            : isReady
-            ? "Buy Tokens"
-            : "Calculating..."}
+          {btnLabel}
         </button>
-        {txMessage && (
-          <p className="text-sm text-center text-zinc-300">{txMessage}</p>
-        )}
+
+        <Toaster />
       </div>
     </HomeLayout>
   );

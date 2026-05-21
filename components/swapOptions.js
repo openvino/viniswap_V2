@@ -1,7 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const SwapOptions = ({ setSlippage, setSwapOptionsOpen }) => {
   const [customSlippage, setCustomSlippage] = useState("");
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setSwapOptionsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setSwapOptionsOpen]);
 
   const handleSelect = (value) => {
     setSlippage(value);
@@ -14,7 +25,7 @@ const SwapOptions = ({ setSlippage, setSwapOptionsOpen }) => {
   };
 
   return (
-    <div className="origin-top-right absolute right-0 mt-2 w-20 rounded-md shadow-lg bg-[#212429] ring-1 ring-black ring-opacity-5 z-[1000]">
+    <div ref={ref} className="origin-top-right absolute right-0 mt-2 w-20 rounded-md shadow-lg bg-[#212429] ring-1 ring-black ring-opacity-5 z-[1000]">
       <div className="flex justify-center p-2">
         <p className="text-sm text-gray-200 ">Slippage</p>
       </div>

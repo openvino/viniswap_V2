@@ -10,6 +10,8 @@ import {
 	unwrapEth,
 	wethAllowance,
 	wrapEth,
+	wethBalance,
+	tokenBalance,
 } from "../utils/queries";
 import {
 	CONNECT_WALLET,
@@ -73,6 +75,7 @@ const Swap = () => {
 		setPrice,
 		loading,
 		address,
+		ethUsdPrice,
 	} = useSwaps();
 
 	const setTransactionMessage = useWeb3Store(
@@ -105,7 +108,6 @@ const Swap = () => {
 		)
 			setSwapBtnText(ENTER_AMOUNT);
 		else setSwapBtnText(SWAP);
-		console.log(srcToken, destToken);
 	}, [inputValue, outputValue, address, srcToken, destToken, isReversed]);
 
 	useEffect(() => {
@@ -114,29 +116,32 @@ const Swap = () => {
 	}, []);
 
 	const performSwap = async () => {
-		setTxPending(true);
 		try {
+			const amountNeeded = parseFloat(srcToken === WETH ? inputValue : inputValue);
+			let balance;
+
+			if (srcToken === WETH) {
+				balance = parseFloat(await wethBalance());
+			} else {
+				balance = parseFloat(await tokenBalance(getCoinAddress(srcToken)));
+			}
+
+			if (isNaN(balance) || balance < amountNeeded) {
+				notifyError("Insufficient balance");
+				return;
+			}
+
+			setTxPending(true);
 			let receipt;
-			console.log(srcToken, destToken);
 
 			if (srcToken === WETH && destToken !== WETH) {
-				receipt = await swapWethToTokens(
-					outputValue,
-					getCoinAddress(destToken)
-				);
-
-				if (!receipt) {
-					throw new Error("Transaction failed");
-				}
+				receipt = await swapWethToTokens(outputValue, getCoinAddress(destToken));
+				if (!receipt) throw new Error("Transaction failed");
 				notifySuccess("Swap completed succesfully!");
 				return;
 			} else if (srcToken !== WETH && destToken === WETH) {
 				receipt = await swapTokensToWeth(inputValue, getCoinAddress(srcToken));
-				if (!receipt) {
-					throw new Error("Transaction failed");
-				}
-				console.log("swap succesful", receipt);
-
+				if (!receipt) throw new Error("Transaction failed");
 				setInputValue("");
 				setOutputValue("");
 			}
@@ -147,8 +152,7 @@ const Swap = () => {
 				notifySuccess();
 			}
 		} catch (error) {
-			console.log(error);
-			// notifyError("Transaction failed");
+			notifyError("Transaction failed");
 		}
 	};
 
@@ -157,7 +161,6 @@ const Swap = () => {
 			await performSwap();
 		} catch (error) {
 			notifyError("Transaction failed");
-			console.log(error);
 		}
 		setTxPending(false);
 	};
@@ -174,7 +177,7 @@ const Swap = () => {
 	}
 
 	return (
-		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900  text-white">
+		<div className="p-5 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 text-white">
 			<div className="flex md:px-4">
 				<NavItems />
 			</div>
@@ -204,6 +207,7 @@ const Swap = () => {
 						srcToken,
 						destToken,
 						address,
+						ethUsdPrice,
 					}}
 				/>
 
@@ -223,6 +227,7 @@ const Swap = () => {
 						srcToken,
 						destToken,
 						address,
+						ethUsdPrice,
 					}}
 				/>
 			</div>

@@ -28,14 +28,11 @@ export default async function handler(req, res) {
 		);
 
 		const data = await response.json();
-		console.log(data);
 
 		if (data.success) {
-			console.log("Human detected");
 
 			return res.status(200).json({ success: true });
 		} else {
-			console.log("fail");
 
 			return res.status(400).json({ error: "Validation failed", data });
 		}

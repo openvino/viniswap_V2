@@ -83,13 +83,9 @@ const Pool = () => {
 	) => {
 		try {
 			const { token0, token1, reverse } = reserves;
-			console.log(tokenAAmount, tokenBAmount, token0, token1, reverse);
-
 			setTransactionMessage(`Step 1/4: Deposit ETH...`);
 
 			const wrapReceipt = await wrapEth(tokenBAmount);
-			console.log("eth wrapped succesfully", wrapReceipt);
-
 			setTransactionMessage(
 				(prev) =>
 					`${prev} done.<br />Step 2/4: Granting ${srcTokenObj.defaultValue} allowance...`
@@ -110,16 +106,6 @@ const Pool = () => {
 			setTransactionMessage(
 				(prev) => `${prev} done. <br />Step 4/4: Adding liquidity...`
 			);
-			console.log(
-				"****************************",
-				token0,
-				token1,
-				reverse ? tokenBAmount : tokenAAmount,
-				reverse ? tokenAAmount : tokenBAmount,
-				0,
-				0
-			);
-
 			const receipt = await addLiquidity(
 				token0,
 				token1,
@@ -127,14 +113,10 @@ const Pool = () => {
 				reverse ? tokenAAmount : tokenBAmount,
 				0,
 				0
-			);
-			console.log("liquidity added", receipt);
-			unwrapEth();
+			);			unwrapEth();
 
 			setTransactionMessage((prev) => `${prev} done.`);
-		} catch (error) {
-			console.log(error);
-			notifyError("Transaction failed", error);
+		} catch (error) {			notifyError("Transaction failed", error);
 		}
 
 		setIsModalOpen(false);
@@ -145,9 +127,7 @@ const Pool = () => {
 		amount,
 		signerLpBalance,
 		removePercentage
-	) => {
-		console.log(reserves);
-		const lpAmount = removePercentage === 100 ? signerLpBalance : amount;
+	) => {		const lpAmount = removePercentage === 100 ? signerLpBalance : amount;
 
 		try {
 			const { address, token0, token1 } = reserves;
@@ -166,8 +146,6 @@ const Pool = () => {
 			}
 
 			await allowance.wait();
-			console.log("allowance granted to remove", lpAmount, allowance);
-
 			setTransactionMessage(
 				(prev) => `${prev} done.<br />Step 2/3: Removing liquidity...`
 			);
@@ -179,15 +157,10 @@ const Pool = () => {
 				setIsModalOpen(false);
 				// notifyError("Transaction failed");
 				return;
-			}
-			console.log("liquidity successfully removed ", receipt);
-			setTransactionMessage(
+			}			setTransactionMessage(
 				(prev) => `${prev} done.<br />Step 3/3: Withdrawing ETH...`
 			);
 			const afterRemoveWethBalance = await wethBalance();
-			console.log(afterRemoveWethBalance);
-			console.log("Withdrawing Eth...");
-
 			const witdrawReceipt = await unwrapEth();
 			if (!witdrawReceipt) {
 				setIsLoading(false);
@@ -196,13 +169,8 @@ const Pool = () => {
 					"Liquidity removal succeded, but ETH not withdrawn. Please withdraw your ETH manually"
 				);
 				return;
-			}
-
-			console.log("successfully unwrapped eth", witdrawReceipt);
-			// notifySuccess("Liquidity removed successfully!");
-		} catch (error) {
-			console.log(error);
-		}
+			}			// notifySuccess("Liquidity removed successfully!");
+		} catch (error) {		}
 		setIsModalOpen(false);
 
 		handleRefresh();
@@ -219,13 +187,7 @@ const Pool = () => {
 
 		let poolData;
 		if (isWhitelisted && address) {
-			console.log(
-				`Pair (${srcToken.address}, ${destToken.address}) is whitelisted`
-			);
-
-			setSwapBtnText(ADD_OR_REMOVE_LIQUIDITY);
-			console.log(pools);
-			const pool = pools.find(
+			setSwapBtnText(ADD_OR_REMOVE_LIQUIDITY);			const pool = pools.find(
 				(pool) =>
 					(pool.token0 === srcToken.address &&
 						pool.token1 === destToken.address) ||
@@ -234,14 +196,8 @@ const Pool = () => {
 			);
 
 			const reverse = pool?.token0 !== srcToken?.address;
-			poolData = { ...pool, reverse: reverse };
-			console.log(poolData);
-			setReserves(poolData);
+			poolData = { ...pool, reverse: reverse };			setReserves(poolData);
 		} else {
-			console.log(
-				`Pair (${srcToken.address}, ${destToken.address}) is not whitelisted`
-			);
-
 			if (!address) setSwapBtnText(CONNECT_WALLET);
 			else setSwapBtnText(SELECT_PAIR);
 			setReserves({});
@@ -260,9 +216,7 @@ const Pool = () => {
 		const getReserves = async () => {
 			const srcTokenAddress = getCoinAddress(srcToken);
 			const destTokenAddress = getCoinAddress(destToken);
-			const reserves = getPoolReserves({ srcToken, destToken });
-			console.log("reserves", reserves);
-			if (inputValue.length === 0) setOutputValue("");
+			const reserves = getPoolReserves({ srcToken, destToken });			if (inputValue.length === 0) setOutputValue("");
 		};
 
 		getReserves();
@@ -287,7 +241,7 @@ const Pool = () => {
 	};
 
 	return (
-		<div className="p-4 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-2 text-white ">
+		<div className="p-5 translate-y-20 rounded-3xl w-full max-w-[500px] bg-zinc-900 mt-2 text-white">
 			<div className="flex md:px-4">
 				<NavItems />
 			</div>
@@ -319,7 +273,7 @@ const Pool = () => {
 			</div>
 
 			<button
-				className={getSwapBtnClassName()}
+				className={getSwapBtnClassName(swapBtnText)}
 				onClick={() => {
 					if (
 						swapBtnText === ADD_OR_REMOVE_LIQUIDITY

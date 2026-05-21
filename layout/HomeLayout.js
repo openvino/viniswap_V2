@@ -5,6 +5,7 @@ import {
 	useSwitchActiveWalletChain,
 } from "thirdweb/react";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import useWeb3Store from "../zustand/store";
 import { useEffect, useState } from "react";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
@@ -42,8 +43,6 @@ const HomeLayout = ({ children }) => {
 				setActiveAccount(account);
 				setSigner(signer);
 			})();
-		} else {
-			router.push("/");
 		}
 	}, [account, activeAccount]);
 	useEffect(() => {
@@ -55,15 +54,13 @@ const HomeLayout = ({ children }) => {
 	return (
 		<div className="flex flex-col min-h-screen overflow-auto">
 			<div className="min-w-screen min-h-screen flex flex-col">
-				<div className="flex items-center justify-center mb-4 z-[1000] ">
+				<div className="flex items-center justify-center mb-4 z-[1000]">
 					<Header />
 				</div>
 
 				<div className="flex justify-center px-2 md:px-16">{children}</div>
 
-				{/* <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-4 ">
-					<TurnstileWidget />
-				</div> */}
+				{/* <Footer /> */}
 			</div>
 		</div>
 	);

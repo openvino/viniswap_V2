@@ -14,14 +14,6 @@ export const mtb24Contract = async (address) => {
 	const activeAccount = useWeb3Store.getState().activeAccount;
 	const signer = useWeb3Store.getState().signer;
 	if (activeAccount) {
-		console.log(
-			provider,
-			"provider",
-			activeAccount,
-			"activeAccount",
-			signer,
-			"signer"
-		);
 		const contractReader = new ethers.Contract(address, mtb24ABI, signer);
 		return contractReader;
 	}
@@ -43,14 +35,6 @@ export const wethContract = async () => {
 	const provider = useWeb3Store.getState().provider;
 	const activeAccount = useWeb3Store.getState().activeAccount;
 	const signer = useWeb3Store.getState().signer;
-	console.log(
-		provider,
-		"provider",
-		activeAccount,
-		"activeAccount",
-		signer,
-		"signer"
-	);
 	if (activeAccount) {
 		const routerObj = await routerContract();
 
@@ -131,14 +115,6 @@ export const factoryContract = async () => {
 	const provider = useWeb3Store.getState().provider;
 	const activeAccount = useWeb3Store.getState().activeAccount;
 	const signer = useWeb3Store.getState().signer;
-	console.log(
-		provider,
-		"provider",
-		activeAccount,
-		"activeAccount",
-		signer,
-		"signer"
-	);
 	if (activeAccount) {
 		const router = await routerContract();
 		const factoryAddress = await router.factory();
@@ -168,14 +144,6 @@ export const mtbContracts = async (address) => {
 	const provider = useWeb3Store.getState().provider;
 	const activeAccount = useWeb3Store.getState().activeAccount;
 	const signer = useWeb3Store.getState().signer;
-	console.log(
-		provider,
-		"provider",
-		activeAccount,
-		"activeAccount",
-		signer,
-		"signer"
-	);
 	if (activeAccount) {
 		const contractReader = new ethers.Contract(address, mtb24ABI, signer);
 		return contractReader;
@@ -246,8 +214,7 @@ export const bridgeContract = async (address) => {
 
 // export const mtb24Contract = async (address) => {
 //   const provider = getProvider();
-//   console.log(provider, "provider");
-
+//
 //   // const signerOrProvider = await getSignerOrProvider(provider);
 //   return new ethers.Contract(address, mtb24ABI, provider);
 // };
