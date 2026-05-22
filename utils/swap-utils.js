@@ -16,24 +16,22 @@ export const defaultSlippage = 20;
 export const notifyError = (msg) => toast.error(msg, { duration: 6000 });
 export const notifySuccess = () => toast.success("Transaction completed.");
 export const getSwapBtnClassName = (swapBtnText) => {
-	let className = "p-4 w-full my-4 rounded-xl bg-zinc-800 text-white";
+	const base = "p-4 w-full my-4 rounded-xl font-semibold text-base transition-all duration-200 text-white";
 
 	switch (swapBtnText) {
 		case CONNECT_WALLET:
-			className += " cursor-pointer ";
-			break;
+			return `${base} bg-[#840c4a] hover:bg-[#9e1058] cursor-pointer shadow-lg shadow-[#840c4a]/30`;
 		case SWAP:
-			className += " cursor-pointer";
-			break;
+			return `${base} bg-[#840c4a] hover:bg-[#9e1058] cursor-pointer shadow-lg shadow-[#840c4a]/30`;
+		case ADD_OR_REMOVE_LIQUIDITY:
+			return `${base} bg-[#840c4a] hover:bg-[#9e1058] cursor-pointer shadow-lg shadow-[#840c4a]/30`;
 		case ENTER_AMOUNT:
-			className += " pointer-events-none";
-			break;
+			return `${base} bg-zinc-700 opacity-60 pointer-events-none`;
 		case SELECT_PAIR:
-			className += " pointer-events-none";
-			break;
+			return `${base} bg-zinc-700 opacity-60 pointer-events-none`;
+		default:
+			return `${base} bg-zinc-700 opacity-60 pointer-events-none`;
 	}
-
-	return className;
 };
 const ALLOWED_SLIPPAGE = ethers.BigNumber.from(200);
 export function calculateSlippageBounds(value) {

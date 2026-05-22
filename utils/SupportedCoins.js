@@ -9,34 +9,42 @@ export const coinAddresses = [
 	{
 		name: WETH,
 		address: process.env.NEXT_PUBLIC_WETH_ADDRESS,
+		icon: "/eth.png",
 	},
 	{
 		name: "MTB18",
 		address: "0x2b1A955b2C8B49579d197eAaa7DcE7DBC7b4dA23",
+		icon: "/tokens/mtb18.svg",
 	},
 	{
 		name: "MTB19",
 		address: "0xd9fc98e7ed79FB67aB5f36013D958aBd85Ff28fF",
+		icon: "/tokens/mtb19.svg",
 	},
 	{
 		name: "MTB20",
 		address: "0x3d98E5829A1bAE7423cf3874662c2f3a0c72123F",
+		icon: "/tokens/mtb20.svg",
 	},
 	{
 		name: "MTB21",
 		address: "0x9a7DF7eD3c536c1940DD98786f3eEfb7810E2f8f",
+		icon: "/tokens/mtb21.svg",
 	},
 	{
 		name: "MTB22",
 		address: "0xeF89072a1f25c2aDA952c2e04644289906e0e6F9",
+		icon: "/tokens/mtb22.svg",
 	},
 	{
 		name: "MTB23",
 		address: "0x80B19e1BD4f5c96bc5cC7f1fc0A3731eBb0F8820",
+		icon: "/tokens/mtb23.svg",
 	},
 	{
 		name: "MTB24",
 		address: "0xeD9eC0f741F52c9B62b7154B30Ed89AC2F389Cfe",
+		icon: "/tokens/mtb24.svg",
 	},
 
 	//BASE SEPOLIA
@@ -91,4 +99,8 @@ export const getCoinAddress = (name) => {
 export const getCoinName = (address) => {
 	const coin = coinAddresses.find((coin) => coin.address === address);
 	return coin?.name || "";
+};
+export const getCoinIcon = (name) => {
+	const coin = coinAddresses.find((coin) => coin.name === name);
+	return coin?.icon || null;
 };

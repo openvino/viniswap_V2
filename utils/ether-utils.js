@@ -2,9 +2,7 @@ import { ethers } from "ethers";
 
 export const toWei = (amount, decimals = 18) => {
   const truncatedAmount = parseFloat(amount).toFixed(18);
-  console.log(truncatedAmount);
   const toWei = ethers.utils.parseUnits(truncatedAmount, decimals);
-  console.log(toWei.toString());
   return toWei.toString();
 };
 

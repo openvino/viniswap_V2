@@ -22,9 +22,6 @@ export const getBalances = (srcToken, destToken, reserves) => {
 
   return Promise.all([srcBalancePromise, destBalancePromise, lpBalancePromise])
     .then(([srcBalance, destBalance, lpBalance]) => {
-      console.log("Source Token Balance:", srcBalance);
-      console.log("Destination Token Balance:", destBalance);
-      console.log("LP Token Balance:", lpBalance);
 
       return {
         srcBalance,

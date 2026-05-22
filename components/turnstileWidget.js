@@ -17,7 +17,6 @@ export const TurnstileWidget = () => {
 			});
 
 			const result = await response.json();
-			console.log(result?.success);
 
 			setIsHuman(result?.success || false);
 		} catch (error) {

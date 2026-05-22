@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../styles/globals.css";
+import Head from "next/head";
 
 import { ThirdwebProvider } from "thirdweb/react";
 import Modal from "react-modal";
@@ -18,6 +19,11 @@ function MyApp({ Component, pageProps }) {
 
 	return (
 		<ThirdwebProvider>
+			<Head>
+				<title>Viniswap | OpenVino DEX</title>
+				<meta name="description" content="Buy and sell tokenized wine on the OpenVino decentralized exchange" />
+				<link rel="icon" href="/favicon.ico" />
+			</Head>
 			<div className="flex flex-col min-h-screen  mb-10">
 				<div className="flex-grow">
 					<Component {...pageProps} />

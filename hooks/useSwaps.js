@@ -4,8 +4,10 @@ import { ENTER_AMOUNT, defaultSlippage } from "../utils/swap-utils";
 import { getPrice, getTokenPrice } from "../utils/queries";
 
 import toast from "react-hot-toast";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useReadContract } from "thirdweb/react";
 import { optimismSepolia } from "thirdweb/chains";
+import { crowdsaleOvi } from "../config/thirdwebClient";
+import { ethers } from "ethers";
 
 const useSwaps = () => {
 	const account = useActiveAccount();
@@ -24,6 +26,15 @@ const useSwaps = () => {
 	const outValue = useState();
 	const [loading, setLoading] = useState(false);
 	const [address, setAddress] = useState(null);
+
+	const { data: ethUsdPriceData } = useReadContract({
+		contract: crowdsaleOvi,
+		method: "getEthUsdPrice",
+		queryOptions: { refetchInterval: 30000 },
+	});
+	const ethUsdPrice = ethUsdPriceData
+		? Number(ethers.utils.formatUnits(ethUsdPriceData, 18))
+		: 0;
 
 	useEffect(() => {
 		if (account) setAddress(account?.address);
@@ -64,8 +75,28 @@ const useSwaps = () => {
 			}
 		};
 
-		if (srcToken && destToken) fetchPrice(srcToken, destToken);
+		if (srcToken && destToken && srcToken !== DEFAULT_VALUE && destToken !== DEFAULT_VALUE)
+			fetchPrice(srcToken, destToken);
 	}, [srcToken, destToken, chain]);
+
+	useEffect(() => {
+		if (!inputValue || !price?.path || price?.token0Reserves === undefined) return;
+
+		try {
+			const srcAddress = getCoinAddress(srcToken);
+			const inputBN = ethers.utils.parseUnits(inputValue.toString(), 18);
+			const r0 = ethers.utils.parseUnits(price.token0Reserves.toString(), 18);
+			const r1 = ethers.utils.parseUnits(price.token1Reserves.toString(), 18);
+			const trim = (bn) =>
+				parseFloat(ethers.utils.formatUnits(bn, 18)).toFixed(8).replace(/\.?0+$/, "");
+
+			if (srcAddress === price.path[0]) {
+				setOutputValue(trim(r1.mul(inputBN).div(r0.add(inputBN))));
+			} else if (srcAddress === price.path[1]) {
+				setOutputValue(trim(r0.mul(inputBN).div(r1.add(inputBN))));
+			}
+		} catch (_) {}
+	}, [price]);
 
 	return {
 		srcToken,
@@ -94,6 +125,7 @@ const useSwaps = () => {
 		setPrice,
 		loading,
 		address,
+		ethUsdPrice,
 	};
 };
 

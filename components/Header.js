@@ -3,6 +3,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { ConnectButton } from "thirdweb/react";
 import { optimismSepolia } from "thirdweb/chains";
 import { client } from "../config/thirdwebClient";
+import Link from "next/link";
 const Header = () => {
 	const [tokenBalComp, setTokenBalComp] = useState();
 
@@ -16,7 +17,9 @@ const Header = () => {
 				{/* <div className="flex items-center justify-between bg-[#2D242F] "> */}
 				<div className="flex flex-col my-4 w-full justify-between px-2 md:px-16">
 					<div className="flex items-center justify-between ">
-						<img src="./mtb.png" className="h-12" />
+						<Link href="/swap">
+							<img src="./mtb.png" className="h-12 cursor-pointer" />
+						</Link>
 
 						{/* <div className="hidden md:flex md:px-4">
               <NavItems />
